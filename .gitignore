@@ -1,0 +1,17 @@
+# APK files (users should add their own)
+apks/*.apk
+
+# UAD exports (user-specific)
+debloat-lists/uad-exports/*
+!debloat-lists/uad-exports/.gitkeep
+
+# Custom profiles (user-specific)
+profiles/custom.conf
+
+# Logs
+*.log
+provision.log
+
+# Backup files
+*.bak
+*~

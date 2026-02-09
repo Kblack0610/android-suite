@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/base_functions.sh"
+SUITE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SUITE_DIR/base_functions.sh"
 
 VERSION="2.0.0"
 
@@ -322,7 +322,7 @@ parse_args() {
 
 run_phase() {
     local phase_num="$1"
-    local phase_script="$SCRIPT_DIR/phases/0${phase_num}_*.sh"
+    local phase_script="$SUITE_DIR/phases/0${phase_num}_*.sh"
 
     local script
     script=$(ls $phase_script 2>/dev/null | head -1)
@@ -355,7 +355,7 @@ run_phase() {
 cmd_apps() {
     # List app sets
     if [[ $APP_LIST -eq 1 ]]; then
-        source "$SCRIPT_DIR/tools/app_installer.sh"
+        source "$SUITE_DIR/tools/app_installer.sh"
         list_app_sets
         return 0
     fi
@@ -366,7 +366,7 @@ cmd_apps() {
             log_error "Specify app set with --set"
             exit 1
         fi
-        source "$SCRIPT_DIR/tools/app_installer.sh"
+        source "$SUITE_DIR/tools/app_installer.sh"
         preview_app_set "$APP_SET"
         return 0
     fi
@@ -387,7 +387,7 @@ cmd_apps() {
     run_phase 1 || return 1
 
     # Install from manifest
-    source "$SCRIPT_DIR/tools/app_installer.sh"
+    source "$SUITE_DIR/tools/app_installer.sh"
     install_from_manifest "$APP_SET"
 
     log_success "App installation complete"
@@ -450,7 +450,7 @@ cmd_config() {
 }
 
 cmd_detect() {
-    source "$SCRIPT_DIR/tools/device_detect.sh"
+    source "$SUITE_DIR/tools/device_detect.sh"
     print_device_info
 }
 
@@ -531,7 +531,7 @@ cmd_provision() {
     # Phase 3: Install Apps
     if [[ "$APP_SET" != "none" ]]; then
         echo ""
-        source "$SCRIPT_DIR/tools/app_installer.sh"
+        source "$SUITE_DIR/tools/app_installer.sh"
         install_from_manifest "$APP_SET"
     fi
 

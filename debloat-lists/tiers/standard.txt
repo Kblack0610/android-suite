@@ -1,0 +1,38 @@
+# Standard Debloat Tier
+# Includes light tier + common bloatware
+# Safe for most users
+
+@include light.txt
+
+# Easter eggs
+com.android.egg
+
+# Enterprise/MDM (unless work device)
+com.android.managedprovisioning
+
+# Accessibility service placeholder
+com.android.accessibilityservice
+
+# Google Bloatware (commonly unused)
+com.google.android.apps.magazines
+com.google.android.apps.podcasts
+com.google.android.apps.books
+com.google.android.videos
+com.google.android.apps.youtube.music
+com.google.android.feedback
+com.google.android.apps.turbo
+
+# Files by Google (if using other file manager)
+com.google.android.apps.nbu.files
+
+# Google One subscription push
+com.google.android.apps.subscriptions.red
+
+# Wellbeing/Digital Balance
+com.google.android.apps.wellbeing
+
+# Google Games (if not gaming)
+com.google.android.play.games
+
+# Google AR (unless needed for specific apps)
+com.google.ar.core

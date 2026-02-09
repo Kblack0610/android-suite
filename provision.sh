@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Android Provisioning Suite - Main Orchestrator
-# Usage: provision.sh [OPTIONS]
+# Independent dimensions: apps, debloat, config
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/base_functions.sh"
 
-VERSION="1.0.0"
+VERSION="2.0.0"
 
 # =============================================================================
 # Usage
@@ -18,78 +18,115 @@ show_usage() {
 Android Provisioning Suite v${VERSION}
 
 USAGE:
-    provision.sh [OPTIONS] [COMMAND]
+    provision.sh [COMMAND] [OPTIONS]
 
 COMMANDS:
-    provision       Run full provisioning (default)
-    detect          Detect device and show info
-    phase <N>       Run specific phase (1-5)
-    settings        Apply settings only (phase 4)
-    debloat         Run debloat only (phase 2)
-    install         Install APKs only (phase 3)
+    apps        Install apps from an app set
+    debloat     Remove bloatware using tier system
+    config      Apply device-specific settings
+    detect      Detect device and show info
+    provision   Run full provisioning (interactive)
 
-OPTIONS:
-    -p, --profile <name>    Use specific profile (default: auto-detect)
-    -d, --dry-run           Show what would happen without making changes
+GLOBAL OPTIONS:
+    -d, --dry-run           Preview without making changes
     -f, --force             Skip confirmation prompts
-    -s, --skip-root         Skip root-only operations (phase 5)
-    -l, --list-devices      List connected devices and exit
     -h, --help              Show this help message
     -v, --version           Show version
+    -l, --list-devices      List connected devices and exit
 
-PROFILES:
-    default     Universal power-user settings
-    pixel       Google Pixel devices
+APPS OPTIONS:
+    --set, -s <name>        App set to install (minimal, personal, work, testing)
+    --list                  List available app sets
+    --preview               Preview apps in set without installing
+
+DEBLOAT OPTIONS:
+    --level, -L <tier>      Debloat tier (light, standard, aggressive)
+    --degoogle              Also remove Google apps (can combine with any tier)
+    --list                  List available tiers
+
+CONFIG OPTIONS:
+    --device, -D <type>     Device profile (pixel, samsung, xiaomi, oneplus)
+
+EXAMPLES:
+    # Install personal app set
+    provision.sh apps --set personal
+
+    # Standard debloat, keep Google
+    provision.sh debloat --level standard
+
+    # Aggressive debloat with degoogling
+    provision.sh debloat --level aggressive --degoogle
+
+    # Apply Samsung-specific settings
+    provision.sh config --device samsung
+
+    # Full interactive provisioning
+    provision.sh provision
+
+    # Preview what would be debloated
+    provision.sh debloat --level standard --dry-run
+
+APP SETS:
+    minimal     Essential utilities only
+    personal    Full personal phone setup
+    work        Business/productivity apps
+    testing     Development and debug tools
+
+DEBLOAT TIERS (cumulative):
+    light       Carrier bloat, unused services
+    standard    + Vendor bloat (Bixby, MIUI apps)
+    aggressive  + More system apps, some Google
+
+DEVICE CONFIGS:
+    pixel       Google Pixel (clean AOSP)
     samsung     Samsung Galaxy (OneUI)
     xiaomi      Xiaomi/Redmi/POCO (MIUI/HyperOS)
     oneplus     OnePlus (OxygenOS/ColorOS)
+    default     Universal settings
 
-EXAMPLES:
-    provision.sh                    # Full provision with auto-detect
-    provision.sh --profile samsung  # Use Samsung profile
-    provision.sh --dry-run          # Preview without changes
-    provision.sh phase 2            # Run debloat only
-    provision.sh detect             # Show device info
-
-PHASES:
-    1. Handshake    - Verify connection, detect device
-    2. Debloat      - Remove bloatware (UAD or lists)
-    3. Install Apps - Sideload APKs from apks/
-    4. Settings     - Apply system settings
-    5. Root Extras  - [Optional] Swift Backup, system mods
-
-For more info: https://github.com/kblack0610/dotfiles
+For more info: https://github.com/kblack0610/android-suite
 EOF
 }
+
+# =============================================================================
+# Global Variables
+# =============================================================================
+
+COMMAND=""
+DRY_RUN=0
+FORCE=0
+
+# Apps options
+APP_SET=""
+APP_LIST=0
+APP_PREVIEW=0
+
+# Debloat options
+DEBLOAT_LEVEL="standard"
+DEGOOGLE=0
+DEBLOAT_LIST=0
+
+# Config options
+DEVICE_CONFIG=""
+
+# Legacy compatibility
+PROFILE=""
+SKIP_ROOT=0
+PHASE=""
 
 # =============================================================================
 # Argument Parsing
 # =============================================================================
 
-PROFILE=""
-DRY_RUN=0
-FORCE=0
-SKIP_ROOT=0
-COMMAND="provision"
-PHASE=""
-
-parse_args() {
+parse_global_opts() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -p|--profile)
-                PROFILE="$2"
-                shift 2
-                ;;
             -d|--dry-run)
                 DRY_RUN=1
                 shift
                 ;;
             -f|--force)
                 FORCE=1
-                shift
-                ;;
-            -s|--skip-root)
-                SKIP_ROOT=1
                 shift
                 ;;
             -l|--list-devices)
@@ -104,36 +141,189 @@ parse_args() {
                 echo "Android Provisioning Suite v${VERSION}"
                 exit 0
                 ;;
-            provision|detect|settings|debloat|install)
-                COMMAND="$1"
-                shift
-                ;;
-            phase)
-                COMMAND="phase"
-                PHASE="$2"
-                shift 2
-                ;;
             *)
-                log_error "Unknown option: $1"
-                show_usage
-                exit 1
+                # Unknown option, return remaining args
+                echo "$@"
+                return 0
                 ;;
         esac
     done
+}
+
+parse_args() {
+    # First arg is command
+    if [[ $# -eq 0 ]]; then
+        COMMAND="provision"
+        return
+    fi
+
+    case "$1" in
+        apps)
+            COMMAND="apps"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    -s|--set)
+                        APP_SET="$2"
+                        shift 2
+                        ;;
+                    --list)
+                        APP_LIST=1
+                        shift
+                        ;;
+                    --preview)
+                        APP_PREVIEW=1
+                        shift
+                        ;;
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -f|--force)
+                        FORCE=1
+                        shift
+                        ;;
+                    *)
+                        log_error "Unknown apps option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
+            ;;
+        debloat)
+            COMMAND="debloat"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    -L|--level)
+                        DEBLOAT_LEVEL="$2"
+                        shift 2
+                        ;;
+                    --degoogle)
+                        DEGOOGLE=1
+                        shift
+                        ;;
+                    --list)
+                        DEBLOAT_LIST=1
+                        shift
+                        ;;
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -f|--force)
+                        FORCE=1
+                        shift
+                        ;;
+                    *)
+                        log_error "Unknown debloat option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
+            ;;
+        config)
+            COMMAND="config"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    -D|--device)
+                        DEVICE_CONFIG="$2"
+                        shift 2
+                        ;;
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -f|--force)
+                        FORCE=1
+                        shift
+                        ;;
+                    *)
+                        log_error "Unknown config option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
+            ;;
+        detect)
+            COMMAND="detect"
+            shift
+            ;;
+        provision|--interactive)
+            COMMAND="provision"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -f|--force)
+                        FORCE=1
+                        shift
+                        ;;
+                    -s|--skip-root)
+                        SKIP_ROOT=1
+                        shift
+                        ;;
+                    # Legacy profile support
+                    -p|--profile)
+                        PROFILE="$2"
+                        shift 2
+                        ;;
+                    *)
+                        log_error "Unknown provision option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
+            ;;
+        # Legacy commands
+        phase)
+            COMMAND="phase"
+            PHASE="$2"
+            shift 2
+            ;;
+        settings)
+            COMMAND="config"
+            shift
+            ;;
+        install)
+            COMMAND="apps"
+            shift
+            ;;
+        -h|--help)
+            show_usage
+            exit 0
+            ;;
+        -v|--version)
+            echo "Android Provisioning Suite v${VERSION}"
+            exit 0
+            ;;
+        -l|--list-devices)
+            adb devices -l
+            exit 0
+            ;;
+        *)
+            log_error "Unknown command: $1"
+            show_usage
+            exit 1
+            ;;
+    esac
 
     # Export for phases
-    export DRY_RUN FORCE PROFILE
+    export DRY_RUN FORCE DEGOOGLE DEBLOAT_LEVEL APP_SET DEVICE_CONFIG
 }
 
 # =============================================================================
-# Main Functions
+# Phase Running
 # =============================================================================
 
 run_phase() {
     local phase_num="$1"
     local phase_script="$SCRIPT_DIR/phases/0${phase_num}_*.sh"
 
-    # Find matching phase script
     local script
     script=$(ls $phase_script 2>/dev/null | head -1)
 
@@ -142,7 +332,6 @@ run_phase() {
         return 1
     fi
 
-    # Source and run
     # shellcheck disable=SC1090
     source "$script"
 
@@ -159,44 +348,192 @@ run_phase() {
     esac
 }
 
-run_provision() {
-    log_section "Android Provisioning Suite v${VERSION}"
+# =============================================================================
+# Command Handlers
+# =============================================================================
+
+cmd_apps() {
+    # List app sets
+    if [[ $APP_LIST -eq 1 ]]; then
+        source "$SCRIPT_DIR/tools/app_installer.sh"
+        list_app_sets
+        return 0
+    fi
+
+    # Preview app set
+    if [[ $APP_PREVIEW -eq 1 ]]; then
+        if [[ -z "$APP_SET" ]]; then
+            log_error "Specify app set with --set"
+            exit 1
+        fi
+        source "$SCRIPT_DIR/tools/app_installer.sh"
+        preview_app_set "$APP_SET"
+        return 0
+    fi
+
+    # Install apps
+    if [[ -z "$APP_SET" ]]; then
+        log_error "Specify app set with --set (or use --list to see options)"
+        exit 1
+    fi
+
+    log_section "Installing App Set: $APP_SET"
 
     if [[ $DRY_RUN -eq 1 ]]; then
         log_warning "DRY-RUN MODE - No changes will be made"
-        echo ""
     fi
 
-    # Phase 1: Handshake (always required)
+    # Phase 1: Handshake
     run_phase 1 || return 1
 
-    # Auto-detect profile if not specified
-    if [[ -z "$PROFILE" ]]; then
-        PROFILE="${SUGGESTED_PROFILE:-default}"
-        log_info "Using auto-detected profile: $PROFILE"
+    # Install from manifest
+    source "$SCRIPT_DIR/tools/app_installer.sh"
+    install_from_manifest "$APP_SET"
+
+    log_success "App installation complete"
+}
+
+cmd_debloat() {
+    # List tiers
+    if [[ $DEBLOAT_LIST -eq 1 ]]; then
+        log_info "Available debloat tiers (cumulative):"
+        echo "  light       Carrier bloat, unused services"
+        echo "  standard    + Vendor bloat (Bixby, MIUI apps)"
+        echo "  aggressive  + More system apps, some Google"
+        echo ""
+        echo "Additional flags:"
+        echo "  --degoogle  Remove Google apps (combinable with any tier)"
+        return 0
     fi
+
+    log_section "Debloating: Level=$DEBLOAT_LEVEL, DeGoogle=$DEGOOGLE"
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_warning "DRY-RUN MODE - No changes will be made"
+    fi
+
+    # Phase 1: Handshake
+    run_phase 1 || return 1
+
+    # Phase 2: Debloat with tier system
+    run_phase 2
+
+    log_success "Debloat complete"
+}
+
+cmd_config() {
+    if [[ -z "$DEVICE_CONFIG" ]]; then
+        # Auto-detect from device
+        run_phase 1 || return 1
+        DEVICE_CONFIG="${SUGGESTED_PROFILE:-default}"
+        log_info "Auto-detected device config: $DEVICE_CONFIG"
+    fi
+
+    log_section "Applying Config: $DEVICE_CONFIG"
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_warning "DRY-RUN MODE - No changes will be made"
+    fi
+
+    # Ensure phase 1 ran
+    if [[ -z "${DEVICE_SERIAL:-}" ]]; then
+        run_phase 1 || return 1
+    fi
+
+    # Set profile and run phase 4
+    PROFILE="$DEVICE_CONFIG"
     export PROFILE
-
-    # Load profile
     load_profile "$PROFILE"
+    run_phase 4
 
-    # Confirmation
+    log_success "Config applied"
+}
+
+cmd_detect() {
+    source "$SCRIPT_DIR/tools/device_detect.sh"
+    print_device_info
+}
+
+cmd_provision() {
+    log_section "Android Provisioning Suite v${VERSION}"
+    log_info "Interactive Mode"
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_warning "DRY-RUN MODE - No changes will be made"
+    fi
+
+    # Phase 1: Handshake
+    run_phase 1 || return 1
+
+    echo ""
+    log_info "Device: $MANUFACTURER $MODEL"
+    log_info "Android: $ANDROID_VERSION (SDK $SDK_VERSION)"
+    log_info "Root: $ROOT_STATUS"
+    log_info "Suggested profile: $SUGGESTED_PROFILE"
+    echo ""
+
+    # Device config selection
+    if [[ -z "$DEVICE_CONFIG" ]]; then
+        DEVICE_CONFIG="${SUGGESTED_PROFILE:-default}"
+    fi
+    if [[ $FORCE -eq 0 ]]; then
+        read -rp "Device config [$DEVICE_CONFIG]: " input
+        DEVICE_CONFIG="${input:-$DEVICE_CONFIG}"
+    fi
+    PROFILE="$DEVICE_CONFIG"
+    export PROFILE DEVICE_CONFIG
+
+    # Debloat level selection
     if [[ $FORCE -eq 0 ]]; then
         echo ""
-        log_info "Ready to provision with profile: $PROFILE"
-        if ! confirm "Continue?"; then
+        log_info "Debloat tiers: light, standard, aggressive"
+        read -rp "Debloat level [$DEBLOAT_LEVEL]: " input
+        DEBLOAT_LEVEL="${input:-$DEBLOAT_LEVEL}"
+
+        read -rp "Remove Google services? [y/N]: " degoogle_choice
+        [[ "$degoogle_choice" =~ ^[Yy] ]] && DEGOOGLE=1
+    fi
+    export DEBLOAT_LEVEL DEGOOGLE
+
+    # App set selection
+    if [[ $FORCE -eq 0 ]]; then
+        echo ""
+        log_info "App sets: minimal, personal, work, testing (or 'none')"
+        read -rp "App set [minimal]: " input
+        APP_SET="${input:-minimal}"
+    else
+        APP_SET="${APP_SET:-minimal}"
+    fi
+    export APP_SET
+
+    # Confirmation
+    echo ""
+    log_info "Will apply:"
+    log_info "  Device config: $DEVICE_CONFIG"
+    log_info "  Debloat: $DEBLOAT_LEVEL $([ $DEGOOGLE -eq 1 ] && echo '+ degoogle' || echo '')"
+    log_info "  App set: $APP_SET"
+    echo ""
+
+    if [[ $FORCE -eq 0 ]]; then
+        if ! confirm "Proceed?"; then
             log_info "Provisioning cancelled"
             return 0
         fi
     fi
+
+    # Load profile
+    load_profile "$PROFILE"
 
     # Phase 2: Debloat
     echo ""
     run_phase 2
 
     # Phase 3: Install Apps
-    echo ""
-    run_phase 3
+    if [[ "$APP_SET" != "none" ]]; then
+        echo ""
+        source "$SCRIPT_DIR/tools/app_installer.sh"
+        install_from_manifest "$APP_SET"
+    fi
 
     # Phase 4: Apply Settings
     echo ""
@@ -205,20 +542,24 @@ run_provision() {
     # Phase 5: Root Extras (optional)
     if [[ $SKIP_ROOT -eq 0 && "${ROOT_STATUS:-none}" != "none" ]]; then
         echo ""
-        if confirm "Run root-only extras (Phase 5)?"; then
+        if [[ $FORCE -eq 1 ]] || confirm "Run root-only extras (Phase 5)?"; then
             run_phase 5
         fi
     fi
 
     # Complete
     log_section "Provisioning Complete!"
-    log_success "Device provisioned with profile: $PROFILE"
+    log_success "Device provisioned"
+    log_info ""
+    log_info "Summary:"
+    log_info "  Config: $DEVICE_CONFIG"
+    log_info "  Debloat: $DEBLOAT_LEVEL $([ $DEGOOGLE -eq 1 ] && echo '+ degoogle' || echo '')"
+    log_info "  Apps: $APP_SET"
     log_info ""
     log_info "Next steps:"
-    log_info "  1. Reboot device to ensure all settings take effect"
-    log_info "  2. Sign into Google account"
-    log_info "  3. Download remaining apps from Play Store"
-    log_info "  4. Configure app-specific settings"
+    log_info "  1. Reboot device"
+    log_info "  2. Sign into accounts"
+    log_info "  3. Configure app settings"
 }
 
 # =============================================================================
@@ -229,12 +570,20 @@ main() {
     parse_args "$@"
 
     case "$COMMAND" in
-        provision)
-            run_provision
+        apps)
+            cmd_apps
+            ;;
+        debloat)
+            cmd_debloat
+            ;;
+        config)
+            cmd_config
             ;;
         detect)
-            source "$SCRIPT_DIR/tools/device_detect.sh"
-            print_device_info
+            cmd_detect
+            ;;
+        provision)
+            cmd_provision
             ;;
         phase)
             if [[ -z "$PHASE" ]]; then
@@ -242,18 +591,6 @@ main() {
                 exit 1
             fi
             run_phase "$PHASE"
-            ;;
-        settings)
-            run_phase 1  # Ensure device connected
-            run_phase 4
-            ;;
-        debloat)
-            run_phase 1
-            run_phase 2
-            ;;
-        install)
-            run_phase 1
-            run_phase 3
             ;;
         *)
             log_error "Unknown command: $COMMAND"

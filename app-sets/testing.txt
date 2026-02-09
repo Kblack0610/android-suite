@@ -1,0 +1,43 @@
+# Testing App Set
+# Development and debugging tools
+
+@include base.txt
+
+# Terminal (essential for testing)
+fdroid:com.termux
+
+# Termux API (for automation)
+fdroid:com.termux.api
+
+# Termux Boot (for startup scripts)
+fdroid:com.termux.boot
+
+# Network Tools
+fdroid:com.aaronjwood.portauthority
+
+# Device Info
+fdroid:com.jaredrummler.android.device
+
+# CPU/System Monitor
+fdroid:com.cpuid.cpu_z
+
+# Logcat Reader
+fdroid:com.dp.logcatapp
+
+# Developer Assistant
+fdroid:com.nicue.devasst
+
+# APK Extractor
+fdroid:axp.tool.apkextractor
+
+# Network Monitor
+fdroid:org.secuso.privacyfriendlynetmonitor
+
+# Battery Monitor
+fdroid:com.darshancomputing.BatteryIndicatorPro
+
+# SQLite Editor (for database debugging)
+fdroid:com.nicue.sqliteeditor
+
+# HTTP Toolkit (for API testing)
+# url:https://httptoolkit.com/android/

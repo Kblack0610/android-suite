@@ -1,0 +1,4 @@
+# Minimal App Set
+# Just the essentials - base utilities only
+
+@include base.txt

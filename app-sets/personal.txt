@@ -1,0 +1,45 @@
+# Personal App Set
+# Full personal phone setup
+
+@include base.txt
+
+# Password Manager
+fdroid:com.kunzisoft.keepass.libre
+# Alternative: local:bitwarden.apk
+
+# Browser
+fdroid:org.mozilla.fennec_fdroid
+
+# Messaging
+# local:signal.apk  # Signal not on F-Droid, download from signal.org
+
+# 2FA
+fdroid:org.shadowice.flocke.andotp
+# Alternative: fdroid:com.beemdevelopment.aegis
+
+# Media
+fdroid:org.videolan.vlc
+
+# Podcast
+fdroid:de.danoeh.antennapod
+
+# RSS Reader
+fdroid:net.frju.flym
+
+# Camera (if replacing stock)
+# fdroid:net.sourceforge.opencamera
+
+# Gallery
+fdroid:com.simplemobiletools.gallery.pro
+
+# Music Player
+fdroid:ch.blinkenlights.android.vanilla
+
+# Maps (offline)
+fdroid:net.osmand.plus
+
+# Calendar
+fdroid:com.simplemobiletools.calendar.pro
+
+# Contacts
+fdroid:com.simplemobiletools.contacts.pro

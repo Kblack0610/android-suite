@@ -1,0 +1,34 @@
+# Work App Set
+# Business/productivity focused
+
+@include base.txt
+
+# Password Manager
+fdroid:com.kunzisoft.keepass.libre
+
+# Browser
+fdroid:org.mozilla.fennec_fdroid
+
+# 2FA (required for most work accounts)
+fdroid:com.beemdevelopment.aegis
+
+# Email (if not using Gmail)
+# fdroid:com.fsck.k9
+
+# Calendar
+fdroid:com.simplemobiletools.calendar.pro
+
+# Contacts
+fdroid:com.simplemobiletools.contacts.pro
+
+# PDF Viewer
+fdroid:com.gsnathan.pdfviewer
+
+# Office Document Viewer
+fdroid:at.tomtasche.reader
+
+# Scanner (documents)
+fdroid:com.todobom.opennotescanner
+
+# VPN Client (if company requires)
+# local:company-vpn.apk

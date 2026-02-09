@@ -1,0 +1,29 @@
+# Light Debloat Tier
+# Safe universal removals - carrier bloat, unused services
+# These are safe to remove on any device
+
+# Carrier bloatware (generic)
+com.android.carrierdefaultapp
+com.android.carrierconfig
+
+# Printing services (rarely used)
+com.android.printspooler
+com.google.android.printservice.recommendation
+
+# Accessibility demo/tutorial apps
+com.android.dreams.basic
+com.android.dreams.phototable
+
+# Unused input methods
+com.android.inputmethod.pinyin
+com.android.inputmethod.japanese
+
+# Cloud print (deprecated by Google)
+com.google.android.apps.cloudprint
+
+# Partner bookmarks (carrier/OEM)
+com.android.providers.partnerbookmarks
+
+# SIM Toolkit (rarely needed)
+com.android.stk
+com.android.ons

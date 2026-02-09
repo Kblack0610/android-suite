@@ -1,0 +1,38 @@
+# Aggressive Debloat Tier
+# Includes standard tier + more system apps
+# For power users who want minimal installs
+# WARNING: Some removals may affect functionality
+
+@include standard.txt
+
+# Google Duo/Meet (if using other video calling)
+com.google.android.apps.tachyon
+
+# Google Docs Suite (if not used)
+com.google.android.apps.docs
+com.google.android.apps.docs.editors.slides
+com.google.android.apps.docs.editors.sheets
+
+# Standalone Google Assistant app
+com.google.android.apps.googleassistant
+
+# Chrome (if using Firefox/other browser)
+com.android.chrome
+
+# Google Maps (if using OsmAnd/other)
+# com.google.android.apps.maps  # Uncomment if you have alternative
+
+# Carrier Services/RCS (if not using RCS messaging)
+com.google.android.ims
+
+# Device Health Services
+com.google.android.apps.turbo
+
+# Google Calendar (if using other calendar)
+# com.google.android.calendar  # Uncomment if you have alternative
+
+# Speech services (if not using voice input)
+# com.google.android.tts  # WARNING: May break some accessibility features
+
+# Android Auto (if not used in car)
+com.google.android.projection.gearhead

@@ -1,5 +1,13 @@
 # APK files (users should add their own)
 apks/*.apk
+!apks/.gitkeep
+
+# Downloaded APKs from F-Droid/URLs
+downloads/
+!downloads/.gitkeep
+
+# F-Droid index cache
+.fdroid_index.json
 
 # UAD exports (user-specific)
 debloat-lists/uad-exports/*
@@ -7,6 +15,9 @@ debloat-lists/uad-exports/*
 
 # Custom profiles (user-specific)
 profiles/custom.conf
+
+# Custom app sets (user-specific)
+app-sets/custom.txt
 
 # Logs
 *.log

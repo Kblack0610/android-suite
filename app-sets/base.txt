@@ -1,0 +1,13 @@
+# Base App Set
+# Core utilities included in all app sets
+# Format: local:<filename> | fdroid:<package.id> | url:<https://...>
+
+# File Manager
+fdroid:com.simplemobiletools.filemanager.pro
+# Alternative: fdroid:me.zhanghai.android.files
+
+# Terminal
+fdroid:com.termux
+
+# Notes (simple)
+fdroid:com.simplemobiletools.notes.pro

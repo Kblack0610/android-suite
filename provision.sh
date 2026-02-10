@@ -30,6 +30,7 @@ COMMANDS:
 GLOBAL OPTIONS:
     -d, --dry-run           Preview without making changes
     -f, --force             Skip confirmation prompts
+    -S, --serial <id>       Use specific device (from 'adb devices')
     -h, --help              Show this help message
     -v, --version           Show version
     -l, --list-devices      List connected devices and exit
@@ -109,6 +110,9 @@ DEBLOAT_LIST=0
 # Config options
 DEVICE_CONFIG=""
 
+# Device selection
+DEVICE_SERIAL=""
+
 # Legacy compatibility
 PROFILE=""
 SKIP_ROOT=0
@@ -183,6 +187,10 @@ parse_args() {
                         FORCE=1
                         shift
                         ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
+                        shift 2
+                        ;;
                     *)
                         log_error "Unknown apps option: $1"
                         exit 1
@@ -215,6 +223,10 @@ parse_args() {
                         FORCE=1
                         shift
                         ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
+                        shift 2
+                        ;;
                     *)
                         log_error "Unknown debloat option: $1"
                         exit 1
@@ -238,6 +250,10 @@ parse_args() {
                     -f|--force)
                         FORCE=1
                         shift
+                        ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
+                        shift 2
                         ;;
                     *)
                         log_error "Unknown config option: $1"
@@ -270,6 +286,10 @@ parse_args() {
                     # Legacy profile support
                     -p|--profile)
                         PROFILE="$2"
+                        shift 2
+                        ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
                         shift 2
                         ;;
                     *)
@@ -313,7 +333,7 @@ parse_args() {
     esac
 
     # Export for phases
-    export DRY_RUN FORCE DEGOOGLE DEBLOAT_LEVEL APP_SET DEVICE_CONFIG
+    export DRY_RUN FORCE DEGOOGLE DEBLOAT_LEVEL APP_SET DEVICE_CONFIG DEVICE_SERIAL
 }
 
 # =============================================================================

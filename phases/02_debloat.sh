@@ -98,23 +98,23 @@ debloat_packages() {
     for package in "${packages[@]}"; do
         if is_dry_run; then
             log_info "[DRY-RUN] Would remove: $package"
-            ((removed++))
+            ((++removed)) || true
             continue
         fi
 
         if ! is_package_installed "$package"; then
             log_debug "Not installed, skipping: $package"
-            ((skipped++))
+            ((++skipped)) || true
             continue
         fi
 
         log_info "Removing: $package"
         if uninstall_package "$package" true; then
             log_success "Removed: $package"
-            ((removed++))
+            ((++removed)) || true
         else
             log_warning "Failed to remove: $package"
-            ((failed++))
+            ((++failed)) || true
         fi
     done
 

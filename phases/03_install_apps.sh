@@ -54,9 +54,9 @@ phase_install_apps() {
 
             for apk in "${apk_files[@]}"; do
                 if install_apk "$apk"; then
-                    ((installed++))
+                    ((++installed)) || true
                 else
-                    ((failed++))
+                    ((++failed)) || true
                 fi
             done
 

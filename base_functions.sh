@@ -20,7 +20,7 @@ NC='\033[0m'
 # =============================================================================
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $*"
+    echo -e "${GREEN}[INFO]${NC} $*" >&2
 }
 
 log_error() {
@@ -28,23 +28,23 @@ log_error() {
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARN]${NC} $*"
+    echo -e "${YELLOW}[WARN]${NC} $*" >&2
 }
 
 log_section() {
-    echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BLUE}  $*${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo "" >&2
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
+    echo -e "${BLUE}  $*${NC}" >&2
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
 }
 
 log_success() {
-    echo -e "${GREEN}[OK]${NC} $*"
+    echo -e "${GREEN}[OK]${NC} $*" >&2
 }
 
 log_debug() {
     if [[ "${DEBUG:-0}" == "1" ]]; then
-        echo -e "${CYAN}[DEBUG]${NC} $*"
+        echo -e "${CYAN}[DEBUG]${NC} $*" >&2
     fi
 }
 
@@ -109,6 +109,21 @@ wait_for_device() {
 
 # Get single device serial (or prompt if multiple)
 get_device_serial() {
+    # If DEVICE_SERIAL already set (via --serial flag), verify and use it
+    if [[ -n "${DEVICE_SERIAL:-}" ]]; then
+        local devices
+        devices=$(adb devices 2>/dev/null | grep -E "device$" | awk '{print $1}')
+        if echo "$devices" | grep -q "^${DEVICE_SERIAL}$"; then
+            echo "$DEVICE_SERIAL"
+            return 0
+        else
+            log_error "Specified device not found: $DEVICE_SERIAL"
+            log_info "Available devices:"
+            echo "$devices" | sed 's/^/  /'
+            return 1
+        fi
+    fi
+
     local devices
     devices=$(adb devices 2>/dev/null | grep -E "device$" | awk '{print $1}')
     local count
@@ -194,13 +209,46 @@ install_apk() {
     fi
 
     log_info "Installing $apk_name..."
-    if adb_cmd install -r "$apk_path" 2>/dev/null; then
+    local output
+    output=$(adb_cmd install -r "$apk_path" 2>&1)
+    local result=$?
+
+    if [[ $result -eq 0 ]]; then
         log_success "Installed $apk_name"
         return 0
-    else
-        log_error "Failed to install $apk_name"
-        return 1
     fi
+
+    # Check for signature mismatch - need to uninstall first
+    if echo "$output" | grep -q "INSTALL_FAILED_UPDATE_INCOMPATIBLE"; then
+        log_warning "Signature mismatch - attempting uninstall and reinstall"
+
+        # Try to get package name from aapt if available
+        local package_name=""
+        if command -v aapt &>/dev/null; then
+            package_name=$(aapt dump badging "$apk_path" 2>/dev/null | grep "^package:" | sed "s/.*name='\\([^']*\\)'.*/\\1/")
+        fi
+
+        # Fallback: extract from APK filename (common pattern: package.name_version.apk)
+        if [[ -z "$package_name" ]]; then
+            package_name="${apk_name%_*}"  # Remove _version.apk
+            package_name="${package_name%.apk}"  # Remove .apk if no version
+        fi
+
+        if [[ -n "$package_name" ]]; then
+            log_info "Uninstalling existing: $package_name"
+            adb_cmd shell pm uninstall "$package_name" &>/dev/null || true
+
+            # Retry install
+            if adb_cmd install "$apk_path" 2>/dev/null; then
+                log_success "Installed $apk_name (after uninstall)"
+                return 0
+            fi
+        fi
+    fi
+
+    log_error "Failed to install $apk_name"
+    log_debug "Install output: $output"
+    return 1
 }
 
 # =============================================================================

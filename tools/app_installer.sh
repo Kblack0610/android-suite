@@ -111,8 +111,8 @@ download_fdroid_apk() {
     # Format: https://f-droid.org/repo/{package_id}_{versioncode}.apk
 
     # First try to get package info from index
-    local apk_name
-    local apk_url
+    local apk_name=""
+    local apk_url=""
 
     # Try direct download of latest suggested version
     # F-Droid format: packagename_versioncode.apk
@@ -136,6 +136,8 @@ download_fdroid_apk() {
 
         if [[ -n "$pkg_info" && "$pkg_info" != "null null" ]]; then
             apk_name="${pkg_info%% *}"
+            # Strip leading slash if present
+            apk_name="${apk_name#/}"
             apk_url="$FDROID_REPO/$apk_name"
         fi
     fi
@@ -260,7 +262,7 @@ install_from_manifest() {
                 apk_path="$APKS_DIR/$value"
                 if [[ ! -f "$apk_path" ]]; then
                     log_error "Local APK not found: $value"
-                    ((failed++))
+                    ((++failed)) || true
                     continue
                 fi
                 ;;
@@ -271,7 +273,7 @@ install_from_manifest() {
                 fi
                 apk_path=$(download_fdroid_apk "$value") || {
                     log_error "Failed to get F-Droid package: $value"
-                    ((failed++))
+                    ((++failed)) || true
                     continue
                 }
                 ;;
@@ -282,7 +284,7 @@ install_from_manifest() {
                 fi
                 apk_path=$(download_url_apk "$value") || {
                     log_error "Failed to download: $value"
-                    ((failed++))
+                    ((++failed)) || true
                     continue
                 }
                 ;;
@@ -293,9 +295,9 @@ install_from_manifest() {
                 log_info "[DRY-RUN] Would install: $apk_path"
             else
                 if install_apk "$apk_path"; then
-                    ((installed++))
+                    ((++installed)) || true
                 else
-                    ((failed++))
+                    ((++failed)) || true
                 fi
             fi
         fi

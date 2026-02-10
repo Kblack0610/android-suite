@@ -17,7 +17,13 @@ detect_device() {
     fi
 
     local serial
-    serial=$(get_device_serial)
+    serial=$(get_device_serial) || return 1
+
+    if [[ -z "$serial" ]]; then
+        log_error "No device serial obtained"
+        return 1
+    fi
+
     export DEVICE_SERIAL="$serial"
 
     # Basic device info
@@ -115,14 +121,14 @@ detect_device() {
 
 print_device_info() {
     if ! check_device; then
-        exit 1
+        return 1
     fi
 
     log_section "Device Information"
 
     # Capture all values
     local output
-    output=$(detect_device)
+    output=$(detect_device) || return 1
 
     # Parse and display
     while IFS='=' read -r key value; do

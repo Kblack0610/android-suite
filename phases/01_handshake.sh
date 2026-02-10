@@ -38,11 +38,13 @@ phase_handshake() {
 
     # Step 3: Detect device info
     log_info "Detecting device..."
-    print_device_info
+    if ! print_device_info; then
+        return 1
+    fi
 
     # Step 4: Store device info for other phases
     local device_info
-    device_info=$(detect_device)
+    device_info=$(detect_device) || return 1
 
     # Export for subsequent phases
     eval "$device_info"

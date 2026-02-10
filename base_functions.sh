@@ -135,11 +135,17 @@ get_device_serial() {
     elif [[ "$count" -eq 1 ]]; then
         echo "$devices"
     else
-        log_warning "Multiple devices connected:"
-        echo "$devices" | nl -w2 -s'. '
-        echo -n "Select device number: "
-        read -r selection
-        echo "$devices" | sed -n "${selection}p"
+        # Multiple devices - require explicit --serial flag
+        log_error "Multiple devices connected. Specify one with --serial:" >&2
+        log_info "" >&2
+        local serial model
+        for serial in $devices; do
+            model=$(adb -s "$serial" shell getprop ro.product.model 2>/dev/null | tr -d '\r')
+            log_info "  $serial  ($model)" >&2
+        done
+        log_info "" >&2
+        log_info "Example: provision.sh --serial $(echo "$devices" | head -1) apps --set minimal" >&2
+        return 1
     fi
 }
 

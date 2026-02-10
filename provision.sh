@@ -21,6 +21,7 @@ USAGE:
     provision.sh [COMMAND] [OPTIONS]
 
 COMMANDS:
+    quick       Quick provisioning with sensible defaults (no prompts)
     apps        Install apps from an app set
     debloat     Remove bloatware using tier system
     config      Apply device-specific settings
@@ -103,7 +104,7 @@ APP_LIST=0
 APP_PREVIEW=0
 
 # Debloat options
-DEBLOAT_LEVEL="standard"
+DEBLOAT_LEVEL="light"
 DEGOOGLE=0
 DEBLOAT_LIST=0
 
@@ -265,6 +266,26 @@ parse_args() {
         detect)
             COMMAND="detect"
             shift
+            ;;
+        quick)
+            COMMAND="quick"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
+                        shift 2
+                        ;;
+                    *)
+                        log_error "Unknown quick option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
             ;;
         provision|--interactive)
             COMMAND="provision"
@@ -474,6 +495,55 @@ cmd_detect() {
     print_device_info
 }
 
+cmd_quick() {
+    log_section "Quick Provisioning"
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_warning "DRY-RUN MODE - No changes will be made"
+    fi
+
+    # Set sensible defaults
+    DEBLOAT_LEVEL="light"
+    DEGOOGLE=0
+    APP_SET="minimal"
+    export DEBLOAT_LEVEL DEGOOGLE APP_SET
+
+    # Run handshake
+    run_phase 1 || return 1
+
+    # Auto-detect config
+    DEVICE_CONFIG="${SUGGESTED_PROFILE:-default}"
+    PROFILE="$DEVICE_CONFIG"
+    export PROFILE DEVICE_CONFIG
+    load_profile "$PROFILE"
+
+    log_info ""
+    log_info "Quick provisioning with:"
+    log_info "  Device config: $DEVICE_CONFIG"
+    log_info "  Debloat: light (keeps Google)"
+    log_info "  Apps: minimal"
+    log_info ""
+
+    # Phase 2: Debloat
+    run_phase 2
+
+    # Phase 3: Install Apps
+    echo ""
+    source "$SUITE_DIR/tools/app_installer.sh"
+    install_from_manifest "$APP_SET"
+
+    # Phase 4: Apply Settings
+    echo ""
+    run_phase 4
+
+    log_section "Quick Provisioning Complete!"
+    log_success "Device provisioned with sensible defaults"
+    log_info ""
+    log_info "Next steps:"
+    log_info "  1. Reboot device"
+    log_info "  2. Sign into accounts"
+}
+
 cmd_provision() {
     log_section "Android Provisioning Suite v${VERSION}"
     log_info "Interactive Mode"
@@ -601,6 +671,9 @@ main() {
             ;;
         detect)
             cmd_detect
+            ;;
+        quick)
+            cmd_quick
             ;;
         provision)
             cmd_provision

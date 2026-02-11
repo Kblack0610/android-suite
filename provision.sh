@@ -156,7 +156,41 @@ parse_global_opts() {
 }
 
 parse_args() {
-    # First arg is command
+    # Parse global options first (before command)
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -d|--dry-run)
+                DRY_RUN=1
+                shift
+                ;;
+            -f|--force)
+                FORCE=1
+                shift
+                ;;
+            -S|--serial)
+                DEVICE_SERIAL="$2"
+                shift 2
+                ;;
+            -l|--list-devices)
+                adb devices -l
+                exit 0
+                ;;
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            -v|--version)
+                echo "Android Provisioning Suite v${VERSION}"
+                exit 0
+                ;;
+            *)
+                # Not a global option, must be command or command option
+                break
+                ;;
+        esac
+    done
+
+    # Now first remaining arg is command
     if [[ $# -eq 0 ]]; then
         COMMAND="provision"
         return

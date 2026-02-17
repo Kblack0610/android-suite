@@ -306,9 +306,109 @@ confirm() {
     [[ "${yn,,}" == "y" ]]
 }
 
+# =============================================================================
+# Wireless ADB Helpers
+# =============================================================================
+
+# Get device IP address
+get_device_ip() {
+    local ip
+    # Try multiple methods to get IP
+    ip=$(adb_cmd shell ip route 2>/dev/null | awk '/wlan0/ {print $9}' | head -1)
+
+    if [[ -z "$ip" ]]; then
+        # Fallback: try ip addr
+        ip=$(adb_cmd shell ip addr show wlan0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+    fi
+
+    if [[ -z "$ip" ]]; then
+        # Fallback: ifconfig
+        ip=$(adb_cmd shell ifconfig wlan0 2>/dev/null | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
+    fi
+
+    echo "$ip"
+}
+
+# Enable wireless ADB (TCP/IP mode)
+enable_wireless_adb() {
+    local port="${1:-5555}"
+
+    if is_dry_run; then
+        log_info "[DRY-RUN] Would enable wireless ADB on port $port"
+        return 0
+    fi
+
+    log_info "Enabling wireless ADB on port $port..."
+
+    # Enable TCP/IP mode
+    if ! adb_cmd tcpip "$port" 2>/dev/null; then
+        log_error "Failed to enable TCP/IP mode"
+        return 1
+    fi
+
+    sleep 2  # Give adbd time to restart
+
+    local ip
+    ip=$(get_device_ip)
+
+    if [[ -z "$ip" ]]; then
+        log_warning "Could not determine device IP"
+        log_info "Find IP in Settings > About Phone > Status"
+        log_info "Then connect with: adb connect <ip>:$port"
+        return 1
+    fi
+
+    log_success "Wireless ADB enabled"
+    log_info ""
+    log_info "  Connect with: adb connect $ip:$port"
+    log_info ""
+
+    echo "$ip:$port"
+}
+
+# Enable persistent wireless ADB (requires root)
+enable_persistent_wireless_adb() {
+    local port="${1:-5555}"
+
+    if is_dry_run; then
+        log_info "[DRY-RUN] Would enable persistent wireless ADB"
+        return 0
+    fi
+
+    # Check if rooted
+    if ! adb_cmd shell "su -c 'id'" 2>/dev/null | grep -q "uid=0"; then
+        log_warning "Persistent wireless ADB requires root"
+        log_info "Using non-persistent mode instead"
+        enable_wireless_adb "$port"
+        return $?
+    fi
+
+    log_info "Enabling persistent wireless ADB on port $port..."
+
+    adb_cmd shell su -c "setprop service.adb.tcp.port $port" 2>/dev/null
+    adb_cmd shell su -c "stop adbd && start adbd" 2>/dev/null
+
+    sleep 2
+
+    local ip
+    ip=$(get_device_ip)
+
+    if [[ -n "$ip" ]]; then
+        log_success "Persistent wireless ADB enabled"
+        log_info ""
+        log_info "  Connect with: adb connect $ip:$port"
+        log_info "  This will persist across reboots"
+        log_info ""
+        echo "$ip:$port"
+    else
+        log_warning "Wireless ADB enabled but could not determine IP"
+    fi
+}
+
 # Export functions for use in other scripts
 export -f log_info log_error log_warning log_section log_success log_debug
 export -f check_adb check_device wait_for_device get_device_serial adb_cmd
 export -f setting_put setting_get
 export -f uninstall_package is_package_installed install_apk
 export -f load_profile is_dry_run confirm
+export -f get_device_ip enable_wireless_adb enable_persistent_wireless_adb

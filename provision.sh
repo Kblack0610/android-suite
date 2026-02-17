@@ -27,6 +27,7 @@ COMMANDS:
     config      Apply device-specific settings
     detect      Detect device and show info
     provision   Run full provisioning (interactive)
+    setup-agent Configure device for headless/automated access
 
 GLOBAL OPTIONS:
     -d, --dry-run           Preview without making changes
@@ -49,6 +50,10 @@ DEBLOAT OPTIONS:
 CONFIG OPTIONS:
     --device, -D <type>     Device profile (pixel, samsung, xiaomi, oneplus)
 
+SETUP-AGENT OPTIONS:
+    --wireless, -w          Also enable wireless ADB (TCP/IP mode)
+    --persistent            Make wireless ADB persist across reboots (requires root)
+
 EXAMPLES:
     # Install personal app set
     provision.sh apps --set personal
@@ -67,6 +72,9 @@ EXAMPLES:
 
     # Preview what would be debloated
     provision.sh debloat --level standard --dry-run
+
+    # Configure device for agent/automated access
+    provision.sh setup-agent --wireless
 
 APP SETS:
     minimal     Essential utilities only
@@ -113,6 +121,10 @@ DEVICE_CONFIG=""
 
 # Device selection
 DEVICE_SERIAL=""
+
+# Setup-agent options
+WIRELESS=0
+PERSISTENT_WIRELESS=0
 
 # Legacy compatibility
 PROFILE=""
@@ -300,6 +312,39 @@ parse_args() {
         detect)
             COMMAND="detect"
             shift
+            ;;
+        setup-agent)
+            COMMAND="setup-agent"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    -w|--wireless)
+                        WIRELESS=1
+                        shift
+                        ;;
+                    --persistent)
+                        WIRELESS=1
+                        PERSISTENT_WIRELESS=1
+                        shift
+                        ;;
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -f|--force)
+                        FORCE=1
+                        shift
+                        ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
+                        shift 2
+                        ;;
+                    *)
+                        log_error "Unknown setup-agent option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
             ;;
         quick)
             COMMAND="quick"
@@ -686,6 +731,75 @@ cmd_provision() {
     log_info "  3. Configure app settings"
 }
 
+cmd_setup_agent() {
+    log_section "Agent Access Setup"
+    log_warning "WARNING: This disables security features!"
+    log_warning "Only use on dedicated test devices."
+    echo ""
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_warning "DRY-RUN MODE - No changes will be made"
+    fi
+
+    # Check device connection
+    if ! check_device; then
+        return 1
+    fi
+
+    # Get device serial if not specified
+    if [[ -z "$DEVICE_SERIAL" ]]; then
+        DEVICE_SERIAL=$(get_device_serial) || return 1
+    fi
+    export DEVICE_SERIAL
+
+    # Load security functions
+    source "$SUITE_DIR/settings/security.sh"
+
+    echo ""
+    log_info "Configuring device: $DEVICE_SERIAL"
+    echo ""
+
+    local errors=0
+
+    # 1. Disable lock screen
+    log_info "Step 1/4: Disabling lock screen..."
+    disable_lock_screen || ((errors++))
+
+    # 2. Configure stay awake
+    log_info "Step 2/4: Configuring stay awake..."
+    configure_stay_awake || ((errors++))
+
+    # 3. Grant shell root (if available)
+    log_info "Step 3/4: Configuring root access..."
+    grant_shell_root || true  # Don't fail if not rooted
+
+    # 4. Enable wireless ADB if requested
+    if [[ $WIRELESS -eq 1 ]]; then
+        log_info "Step 4/4: Enabling wireless ADB..."
+        if [[ $PERSISTENT_WIRELESS -eq 1 ]]; then
+            enable_persistent_wireless_adb || ((errors++))
+        else
+            enable_wireless_adb || ((errors++))
+        fi
+    else
+        log_info "Step 4/4: Wireless ADB skipped (use --wireless to enable)"
+    fi
+
+    # Summary
+    echo ""
+    if [[ $errors -eq 0 ]]; then
+        log_success "Device configured for agent access!"
+    else
+        log_warning "Setup completed with $errors warning(s)"
+    fi
+
+    echo ""
+    log_info "Verification commands:"
+    log_info "  adb shell whoami"
+    log_info "  adb shell input tap 500 500"
+    log_info "  adb shell dumpsys window | grep mCurrentFocus"
+}
+
 # =============================================================================
 # Entry Point
 # =============================================================================
@@ -711,6 +825,9 @@ main() {
             ;;
         provision)
             cmd_provision
+            ;;
+        setup-agent)
+            cmd_setup_agent
             ;;
         phase)
             if [[ -z "$PHASE" ]]; then

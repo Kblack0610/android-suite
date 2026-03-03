@@ -1,0 +1,90 @@
+# Travel App Set
+# Airlines, hotels, rideshare, navigation
+# Created: 2026-02-17
+
+@include base.txt
+
+# === NAVIGATION ===
+# Google Translate (available offline)
+# playstore:com.google.android.apps.translate
+
+# Waze Navigation
+# playstore:com.waze
+
+# === AIRLINES ===
+# American Airlines
+# playstore:com.aa.android
+
+# Alaska Airlines
+# playstore:com.alaskaairlines.android
+
+# Frontier Airlines
+# playstore:com.flyfrontier.android
+
+# JetBlue
+# playstore:com.jetblue.JetBlueAndroid
+
+# Ryanair
+# playstore:com.ryanair.cheapflights
+
+# Southwest Airlines
+# playstore:com.southwestairlines.mobile
+
+# Spirit Airlines
+# playstore:com.spirit.customerapp
+
+# United Airlines
+# playstore:com.united.mobile.android
+
+# === BOOKING & SEARCH ===
+# Airbnb
+# playstore:com.airbnb.android
+
+# Skiplagged
+# playstore:com.skiplagged
+
+# === HOTELS ===
+# Hilton Honors
+# playstore:com.hilton.android.hhonors
+
+# World of Hyatt
+# playstore:com.Hyatt.hyt
+
+# Marriott Bonvoy
+# playstore:com.marriott.mrt
+
+# Wyndham Rewards
+# playstore:com.wyndhamhotelgroup.wyndhamrewards
+
+# === RIDESHARE ===
+# Uber
+# playstore:com.ubercab
+
+# Uber Eats
+# playstore:com.ubercab.eats
+
+# Lyft
+# playstore:me.lyft.android
+
+# === GROUND TRANSPORT ===
+# Amtrak
+# playstore:com.amtrak.rider
+
+# U-Haul
+# playstore:com.uhaul.android.myuhaul
+
+# === CAR ===
+# FordPass
+# playstore:com.ford.fordpass
+
+# Toyota
+# playstore:com.toyota.oneapp
+
+# === AIRPORT ===
+# CLEAR
+# playstore:com.clearme.clearapp
+
+# ---
+# NOTE: Most travel apps require Play Store installation.
+# This manifest serves as documentation of your travel app set.
+# Install via Play Store or use Aurora Store for Play Store apps.

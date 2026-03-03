@@ -1,0 +1,44 @@
+# Gaming App Set
+# Mobile games, chess, card games
+# Created: 2026-02-17
+
+@include base.txt
+
+# === CHESS (F-Droid available) ===
+# Lichess - Open source chess
+fdroid:org.lichess.mobileapp
+
+# === CHESS (Play Store) ===
+# Chess.com
+# playstore:com.chess
+
+# Chess Clock
+# playstore:com.chess.clock
+
+# Chess Club
+# playstore:com.gamovation.chessclubpilot
+
+# === CARD GAMES ===
+# Slay the Spire
+# playstore:com.humble.SlayTheSpire
+
+# Magic: The Gathering Arena
+# playstore:com.wizards.mtga
+
+# === ROGUELIKES ===
+# Vampire Survivors
+# playstore:com.poncle.vampiresurvivors
+
+# Brotato
+# playstore:com.brotato.shooting.survivors.action.roguelike
+
+# === CASUAL ===
+# Pixel Art
+# playstore:com.pixel.art.coloring.color.number
+
+# Last War
+# playstore:com.fun.lastwar.gp
+
+# ---
+# Lichess is the only fully open-source option here.
+# Most games require Play Store for purchases/sync.

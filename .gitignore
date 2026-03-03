@@ -15,6 +15,7 @@ debloat-lists/uad-exports/*
 
 # Custom profiles (user-specific)
 profiles/custom.conf
+profiles/nas.conf
 
 # Custom app sets (user-specific)
 app-sets/custom.txt

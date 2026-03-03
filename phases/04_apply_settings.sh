@@ -77,12 +77,22 @@ phase_apply_settings() {
         if [[ "${STAY_AWAKE_CHARGING:-1}" == "1" ]]; then
             enable_stay_awake_charging
         fi
+
+        set_default_usb_mode "${USB_DEFAULT_MODE:-mtp}"
     fi
 
     # Apply any custom settings from profile
     if declare -f apply_custom_settings &>/dev/null; then
         log_info "Applying custom profile settings..."
         apply_custom_settings
+    fi
+
+    # Apply app-specific configuration
+    if [[ -f "$settings_dir/apps.sh" ]]; then
+        log_info "Applying app configuration..."
+        # shellcheck disable=SC1091
+        source "$settings_dir/apps.sh"
+        configure_material_files_smb
     fi
 
     log_section "Settings Applied"

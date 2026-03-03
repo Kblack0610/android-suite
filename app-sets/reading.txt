@@ -1,0 +1,20 @@
+# Reading & News App Set
+# Books, news, AI assistants
+# Created: 2026-02-17
+
+@include base.txt
+
+# === READERS (F-Droid available) ===
+# ReadEra - eBook reader
+fdroid:org.readera
+
+# === NEWS ===
+# Wall Street Journal
+# playstore:com.viz.wsj.android
+
+# === AI ASSISTANTS ===
+# Perplexity AI
+# playstore:ai.perplexity.app.android
+
+# ---
+# ReadEra supports PDF, EPUB, MOBI, FB2, and more.

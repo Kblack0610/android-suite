@@ -27,9 +27,17 @@ cmd_list() {
 }
 
 cmd_all() {
+    # Kill any existing scrcpy instances for a clean start
+    local existing_pids
+    existing_pids=$(pgrep -x scrcpy 2>/dev/null || true)
+    if [[ -n "$existing_pids" ]]; then
+        kill $existing_pids 2>/dev/null || true
+        sleep 0.3  # Brief pause to let windows close
+    fi
+
     local count=0
     local serials
-    serials=$(adb devices 2>/dev/null | grep -w device | cut -f1)
+    serials=$(adb devices 2>/dev/null | grep -w device | grep -v '^emulator-' | cut -f1)
 
     if [[ -z "$serials" ]]; then
         echo "No devices connected"

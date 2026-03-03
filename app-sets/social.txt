@@ -1,0 +1,30 @@
+# Social & Messaging App Set
+# Messaging, social networks, communication
+# Created: 2026-02-17
+
+@include base.txt
+
+# === SECURE MESSAGING (F-Droid available) ===
+# Signal - Privacy-focused messaging
+fdroid:org.thoughtcrime.securesms
+
+# === MESSAGING (Play Store) ===
+# Discord
+# playstore:com.discord
+
+# WhatsApp
+# playstore:com.whatsapp
+
+# Facebook Messenger
+# playstore:com.facebook.orca
+
+# Slack (also work-related)
+# playstore:com.Slack
+
+# === SOCIAL NETWORKS ===
+# Nextdoor
+# playstore:com.nextdoor
+
+# ---
+# Signal is the only app here available on F-Droid.
+# For privacy, consider using F-Droid version of Signal.

@@ -92,6 +92,22 @@ enable_usb_debugging() {
     log_success "USB debugging enabled"
 }
 
+# Set default USB connection mode
+# Args: mode (mtp=File Transfer, ptp=Photo Transfer, midi, rndis=Tethering, adb=Charging+ADB)
+# Default "mtp" enables file transfer + ADB ready on plug-in
+set_default_usb_mode() {
+    local mode="${1:-mtp}"
+
+    if is_dry_run; then
+        log_info "[DRY-RUN] Would set default USB mode to '$mode'"
+        return 0
+    fi
+
+    log_info "Setting default USB mode to '$mode'"
+    setting_put global usb_default_config "$mode"
+    log_success "Default USB mode set to '$mode' — takes effect on next plug-in"
+}
+
 # Grant permission to an app
 # Args: package_name permission
 grant_permission() {

@@ -1,0 +1,62 @@
+# Music Tools App Set
+# Instrument tuners, tabs, headphone apps, DAW tools
+# Created: 2026-02-17
+
+@include base.txt
+
+# === TUNERS ===
+# GuitarTuna
+# playstore:com.ovelin.guitartuna
+
+# Peterson Strobe Tuner
+# playstore:com.petersontuners.strobe
+
+# Soundcorset
+# playstore:com.soundcorset.client.android
+
+# === TABS & LEARNING ===
+# Ultimate Guitar
+# playstore:com.ultimateguitar.tabs
+
+# Tonebridge (amp tones)
+# playstore:com.ultimateguitar.tonebridge
+
+# Songsterr
+# playstore:com.songsterr
+
+# Musescore
+# playstore:com.musescore.playerlite
+
+# === AMP/PEDAL CONTROL ===
+# Fender Tone
+# playstore:com.fender.tone
+
+# Boss Katana Editor
+# playstore:jp.co.roland.BossKatana3Editor
+
+# Roland Piano App
+# playstore:jp.co.roland.RolandPianoApp
+
+# === HEADPHONES ===
+# Shokz (bone conduction)
+# playstore:cn.com.aftershokz.app
+
+# Bose Music
+# playstore:com.bose.bosemusic
+
+# Bose Connect
+# playstore:com.bose.monet
+
+# Denon Headphones
+# playstore:com.denon.headphones.android
+
+# Technics Audio Connect
+# playstore:com.panasonic.technicsaudioconnect
+
+# === DISCOVERY ===
+# Shazam
+# playstore:com.shazam.android
+
+# ---
+# NOTE: Headphone companion apps are often required for EQ and features.
+# Music gear apps (Boss, Roland, Fender) connect via Bluetooth MIDI.

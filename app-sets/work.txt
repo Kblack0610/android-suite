@@ -1,26 +1,27 @@
-# Work App Set
+# Work & Professional App Set
 # Business/productivity focused
+# Updated: 2026-02-17
 
 @include base.txt
 
+# === SECURITY (F-Droid) ===
 # Password Manager
 fdroid:com.kunzisoft.keepass.libre
-
-# Browser
-fdroid:org.mozilla.fennec_fdroid
 
 # 2FA (required for most work accounts)
 fdroid:com.beemdevelopment.aegis
 
-# Email (if not using Gmail)
-# fdroid:com.fsck.k9
+# Browser
+fdroid:org.mozilla.fennec_fdroid
 
+# === PIM (F-Droid) ===
 # Calendar
 fdroid:com.simplemobiletools.calendar.pro
 
 # Contacts
 fdroid:com.simplemobiletools.contacts.pro
 
+# === DOCUMENTS (F-Droid) ===
 # PDF Viewer
 fdroid:com.gsnathan.pdfviewer
 
@@ -30,5 +31,49 @@ fdroid:at.tomtasche.reader
 # Scanner (documents)
 fdroid:com.todobom.opennotescanner
 
-# VPN Client (if company requires)
-# local:company-vpn.apk
+# === PROJECT MANAGEMENT (Play Store) ===
+# Linear
+# playstore:app.linear
+
+# === COMMUNICATION (Play Store) ===
+# Zoom
+# playstore:us.zoom.videomeetings
+
+# Slack
+# playstore:com.Slack
+
+# === HR/BUSINESS (Play Store) ===
+# Rippling
+# playstore:com.people.rippling
+
+# Okta (auth)
+# playstore:com.okta.android.auth
+
+# === FREELANCE (Play Store) ===
+# Upwork
+# playstore:com.upwork.android.apps.main
+
+# Fiverr
+# playstore:com.fiverr.fiverr
+
+# === DEV (Play Store) ===
+# GitHub
+# playstore:com.github.android
+
+# === CARRIERS/UTILITIES (Play Store) ===
+# T-Mobile
+# playstore:com.dti.tmobile
+
+# Spectrum
+# playstore:com.brighthouse.mybhn
+
+# === INDUSTRY SPECIFIC (Play Store) ===
+# Weedmaps
+# playstore:com.weedmaps.app.android
+
+# Dr. Dabber
+# playstore:com.drdabber
+
+# ---
+# F-Droid apps above are auto-installable.
+# Play Store apps are documented for reference.

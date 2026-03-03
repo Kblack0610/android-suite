@@ -1,0 +1,25 @@
+# Sports & Outdoors App Set
+# Fantasy sports, hunting, outdoor activities
+# Created: 2026-02-17
+
+@include base.txt
+
+# === FANTASY SPORTS ===
+# ESPN Fantasy
+# playstore:com.espn.fantasy.lm.football
+
+# Sleeper
+# playstore:com.sleeperbot
+
+# SeatGeek (tickets)
+# playstore:com.seatgeek.android
+
+# === OUTDOORS ===
+# onX Hunt (maps)
+# playstore:onxmaps.hunt
+
+# AllTrails
+# playstore:com.alltrails.alltrails
+
+# ---
+# NOTE: onX Hunt requires subscription for offline maps.

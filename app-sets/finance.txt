@@ -1,0 +1,67 @@
+# Finance App Set
+# Banking, payments, investments, crypto
+# Created: 2026-02-17
+
+@include base.txt
+
+# === BANKING ===
+# Capital One
+# playstore:com.konylabs.capitalone
+
+# US Bank
+# playstore:com.usbank.mobilebanking
+
+# Wells Fargo
+# playstore:com.wf.wellsfargomobile
+
+# === CREDIT CARDS ===
+# American Express
+# playstore:com.americanexpress.android.acctsvcs.us
+
+# Bilt Rewards
+# playstore:com.biltrewards.bilt
+
+# === PAYMENTS ===
+# PayPal
+# playstore:com.paypal.android.p2pmobile
+
+# Venmo
+# playstore:com.venmo
+
+# Zelle
+# playstore:com.zellepay.zelle
+
+# === INVESTING ===
+# Fidelity
+# playstore:com.fidelity.android
+
+# === CRYPTO ===
+# Coinbase
+# playstore:com.coinbase.android
+
+# CoinGecko
+# playstore:com.coingecko.coingeckoapp
+
+# Kraken
+# playstore:com.kraken.invest.app
+
+# Trezor Suite
+# playstore:io.trezor.suite
+
+# === BUSINESS ===
+# QuickBooks
+# playstore:com.intuit.quickbooks
+
+# Deel
+# playstore:com.deel.app
+
+# Splitwise
+# playstore:com.Splitwise.SplitwiseMobile
+
+# === INSURANCE ===
+# GEICO
+# playstore:com.geico.mobile
+
+# ---
+# NOTE: Finance apps require Play Store for security verification.
+# Never sideload banking apps - always use official sources.

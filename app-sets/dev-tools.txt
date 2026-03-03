@@ -1,0 +1,56 @@
+# Dev Tools App Set
+# Development, debugging, terminal, tech tools
+# Created: 2026-02-17
+
+@include base.txt
+
+# === TERMINAL (F-Droid available) ===
+# Termux - Linux terminal
+fdroid:com.termux
+
+# === BROWSER (F-Droid available) ===
+# Firefox
+fdroid:org.mozilla.firefox
+
+# === VERSION CONTROL ===
+# GitJournal
+# playstore:io.gitjournal.gitjournal
+
+# GitHub
+# playstore:com.github.android
+
+# === DEVELOPMENT ===
+# Expo Go (React Native)
+# playstore:host.exp.exponent
+
+# === SYSTEM ===
+# APatch (root)
+# playstore:me.bmax.apatch
+
+# LaunchBox
+# playstore:com.unbrokensoftware.launchbox
+
+# === HARDWARE DEBUG ===
+# nRF Connect (BLE)
+# playstore:no.nordicsemi.android.mcp
+
+# === VPN ===
+# Tailscale
+# playstore:com.tailscale.ipn
+
+# Speedify
+# playstore:com.speedify.speedifyandroid
+
+# Free VPN Planet
+# playstore:com.freevpnplanet
+
+# === OBD/CAR ===
+# OBD Android
+# playstore:ai.metaverselabs.obdandroid
+
+# OBDLink
+# playstore:OCTech.Mobile.Applications.OBDLink
+
+# ---
+# Termux and Firefox are fully available on F-Droid.
+# These are the core dev tools that can be auto-provisioned.

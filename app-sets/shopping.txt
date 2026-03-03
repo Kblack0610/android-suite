@@ -1,0 +1,74 @@
+# Shopping & Food App Set
+# Retail, delivery, restaurants, tickets
+# Created: 2026-02-17
+
+@include base.txt
+
+# === RETAIL ===
+# Amazon
+# playstore:com.amazon.mShop.android.shopping
+
+# Costco
+# playstore:com.costco.app.android
+
+# Walmart
+# playstore:com.walmart.android
+
+# Wayfair
+# playstore:com.wayfair.wayfair
+
+# IKEA
+# playstore:com.ingka.ikea.app
+
+# eBay
+# playstore:com.ebay.mobile
+
+# Etsy
+# playstore:com.etsy.android
+
+# OfferUp
+# playstore:com.offerup
+
+# Whatnot
+# playstore:com.whatnot_mobile
+
+# === MUSIC GEAR ===
+# Reverb (instruments/gear)
+# playstore:com.reverb.app
+
+# === FOOD & DELIVERY ===
+# DoorDash
+# playstore:com.dd.doordash
+
+# Resy (reservations)
+# playstore:com.resy.android.prod
+
+# King of Happy Hour
+# playstore:com.kingofhappyhour.android
+
+# inKind (restaurant rewards)
+# playstore:com.inkind.inkind
+
+# TouchTunes (jukebox)
+# playstore:com.touchtunes.android
+
+# === PHARMACY ===
+# CVS
+# playstore:com.cvs.launchers.cvs
+
+# Rite Aid
+# playstore:com.riteaid.android
+
+# === TICKETS ===
+# Ticketmaster
+# playstore:com.ticketmaster.mobile.android.na
+
+# StubHub
+# playstore:com.stubhub
+
+# === REAL ESTATE ===
+# Zillow
+# playstore:com.zillow.android.zillowmap
+
+# ---
+# NOTE: Shopping apps need Play Store for payment integration.

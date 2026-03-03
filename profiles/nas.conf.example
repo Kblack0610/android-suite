@@ -1,0 +1,32 @@
+# NAS SMB Configuration Template
+# Copy this file to nas.conf and modify as needed
+#
+# Used by Phase 4 to pre-configure Material Files SMB server connection.
+# The provisioning flow will open the "Add SMB Server" screen on the device
+# and display connection details for you to enter.
+
+# =============================================================================
+# NAS Connection Settings
+# =============================================================================
+
+# Enable NAS configuration during provisioning (1=enabled, 0=disabled)
+NAS_ENABLED=1
+
+# SMB server hostname or IP address
+NAS_HOST="192.168.1.152"
+
+# SMB port (default: 445)
+NAS_PORT=445
+
+# Share path (the SMB share name)
+NAS_PATH="public"
+
+# Display name shown in Material Files bookmark list
+NAS_DISPLAY_NAME="NAS - Public"
+
+# Authentication mode: "guest" or "credentials"
+NAS_AUTH_MODE="guest"
+
+# Credentials (only used when NAS_AUTH_MODE="credentials")
+# NAS_USERNAME=""
+# NAS_PASSWORD=""

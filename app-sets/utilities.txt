@@ -1,0 +1,82 @@
+# Utilities App Set
+# System tools, smart home, keyboards, network
+# Created: 2026-02-17
+
+@include base.txt
+
+# === FILE MANAGEMENT (F-Droid available) ===
+# Material Files - Modern file manager
+fdroid:me.zhanghai.android.files
+
+# === KEYBOARD ===
+# Gboard
+# playstore:com.google.android.inputmethod.latin
+
+# Codeboard (coding keyboard)
+# playstore:com.gazlaws.codeboard
+
+# === NETWORK ===
+# Fing (network scanner)
+# playstore:com.overlook.android.fing
+
+# Tailscale (VPN mesh)
+# playstore:com.tailscale.ipn
+
+# === SMART HOME ===
+# Google Home (Chromecast)
+# playstore:com.google.android.apps.chromecast.app
+
+# Amazon Alexa
+# playstore:com.amazon.dee.app
+
+# TP-Link Kasa
+# playstore:com.tplink.iot
+
+# Klevio (smart lock)
+# playstore:com.klevio.klevio
+
+# Roku Remote
+# playstore:com.roku.remote
+
+# === WEARABLES ===
+# Wear OS
+# playstore:com.google.android.apps.wear.companion
+
+# RingConn (smart ring)
+# playstore:com.gdjztech.ringconn
+
+# === PRINTING ===
+# Brother Printer
+# playstore:com.brother.mfc.mobileconnect
+
+# JC Cloud Printer
+# playstore:com.gengcon.android.jccloudprinter
+
+# === GOOGLE ===
+# Google Photos
+# playstore:com.google.android.apps.photos
+
+# Google Wallet
+# playstore:com.google.android.apps.walletnfcrel
+
+# Find My Device
+# playstore:com.google.android.apps.adm
+
+# Contact Key Verification
+# playstore:com.google.android.contactkeys
+
+# === MISC ===
+# AppBlock
+# playstore:cz.mobilesoft.appblock
+
+# Remote Gamepad
+# playstore:com.remotegamepad
+
+# Checkmate
+# playstore:com.splendapps.checkmate
+
+# SDG&E (utility)
+# playstore:com.sew.sdgeemr
+
+# ---
+# Material Files is an excellent F-Droid alternative to Samsung My Files.

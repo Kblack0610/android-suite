@@ -1,0 +1,53 @@
+# Media & Entertainment App Set
+# Streaming, video, audio, podcasts
+# Created: 2026-02-17
+
+@include base.txt
+
+# === VIDEO STREAMING ===
+# Netflix
+# playstore:com.netflix.mediaclient
+
+# Hulu
+# playstore:com.hulu.plus
+
+# Max (HBO)
+# playstore:com.wbd.stream
+
+# Prime Video
+# playstore:com.amazon.avod.thirdpartyclient
+
+# Paramount+
+# playstore:com.cbs.app
+
+# === ANIME/MANGA ===
+# Crunchyroll
+# playstore:com.crunchyroll.crunchyroid
+
+# Manga Plus
+# playstore:jp.co.shueisha.mangaplus
+
+# === AUDIO ===
+# Spotify
+# playstore:com.spotify.music
+
+# Pandora
+# playstore:com.pandora.android
+
+# SoundCloud
+# playstore:com.soundcloud.android
+
+# Audible
+# playstore:com.audible.application
+
+# === GAME STREAMING ===
+# Moonlight (Steam/PC streaming)
+# playstore:com.limelight
+
+# === CREATOR ===
+# Patreon
+# playstore:com.patreon.android
+
+# ---
+# NOTE: Streaming apps require subscriptions and DRM.
+# These must be installed via Play Store for DRM support.

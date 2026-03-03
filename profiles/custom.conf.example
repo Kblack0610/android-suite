@@ -40,6 +40,10 @@ BATTERY_SAVER_LEVEL=20
 # 0=off, 1=AC only, 2=USB only, 3=AC+USB, 7=all (including wireless)
 STAY_AWAKE_CHARGING=1
 
+# Default USB connection mode on plug-in
+# mtp=File Transfer (recommended), ptp=Photo Transfer, adb=Charging+ADB only
+USB_DEFAULT_MODE="mtp"
+
 # =============================================================================
 # Debloat Settings
 # =============================================================================

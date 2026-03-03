@@ -1,0 +1,51 @@
+# Productivity App Set
+# Notes, documents, learning, tools
+# Created: 2026-02-17
+
+@include base.txt
+
+# === NOTES & DOCS (F-Droid available) ===
+# AnkiDroid - Flashcards
+fdroid:com.ichi2.anki
+
+# === NOTES (Play Store) ===
+# Obsidian
+# playstore:md.obsidian
+
+# Samsung Notes
+# playstore:com.samsung.android.app.notes
+
+# Samsung Reminder
+# playstore:com.samsung.android.app.reminder
+
+# === DOCUMENTS ===
+# Google Docs
+# playstore:com.google.android.apps.docs.editors.docs
+
+# Google Calendar
+# playstore:com.google.android.calendar
+
+# PowerPoint
+# playstore:com.microsoft.office.powerpoint
+
+# Adobe Scan
+# playstore:com.adobe.scan.android
+
+# === CAD/DESIGN ===
+# Onshape (3D CAD)
+# playstore:com.onshape.app
+
+# === LEARNING ===
+# Duolingo
+# playstore:com.duolingo
+
+# Coursera
+# playstore:org.coursera.android
+
+# === PUZZLES ===
+# NYT Crossword
+# playstore:com.nytimes.crossword
+
+# ---
+# AnkiDroid syncs with AnkiWeb for cross-device flashcards.
+# Obsidian vaults can sync via Syncthing or Git.

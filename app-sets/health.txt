@@ -1,0 +1,30 @@
+# Health & Fitness App Set
+# Exercise, medical, wellness
+# Created: 2026-02-17
+
+@include base.txt
+
+# === FITNESS ===
+# Strava
+# playstore:com.strava
+
+# MapMyRun
+# playstore:com.mapmyrun.android2
+
+# ClassPass
+# playstore:com.classpass.classpass
+
+# === MEDICAL ===
+# Kaiser Permanente
+# playstore:org.kp.m
+
+# 23andMe
+# playstore:com.twentythreeandme.app
+
+# === DENTAL ===
+# Beam Dental
+# playstore:dental.beam.beamapp
+
+# ---
+# NOTE: Health apps contain sensitive data.
+# Always use official Play Store versions for security.

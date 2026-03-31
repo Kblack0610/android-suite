@@ -48,7 +48,7 @@ phase_handshake() {
 
     # Export for subsequent phases
     eval "$device_info"
-    export DEVICE_SERIAL MANUFACTURER MODEL ANDROID_VERSION ROOT_STATUS SUGGESTED_PROFILE
+    export DEVICE_SERIAL DEVICE_NAME MANUFACTURER MODEL ANDROID_VERSION ROOT_STATUS SUGGESTED_PROFILE
 
     # Step 5: Verify shell access
     log_info "Verifying shell access..."

@@ -147,7 +147,8 @@ parse_global_opts() {
                 shift
                 ;;
             -l|--list-devices)
-                adb devices -l
+                log_section "Connected Devices"
+                list_devices table
                 exit 0
                 ;;
             -h|--help)
@@ -184,7 +185,8 @@ parse_args() {
                 shift 2
                 ;;
             -l|--list-devices)
-                adb devices -l
+                log_section "Connected Devices"
+                list_devices table
                 exit 0
                 ;;
             -h|--help)
@@ -422,7 +424,8 @@ parse_args() {
             exit 0
             ;;
         -l|--list-devices)
-            adb devices -l
+            log_section "Connected Devices"
+            list_devices table
             exit 0
             ;;
         *)
@@ -635,7 +638,9 @@ cmd_provision() {
     run_phase 1 || return 1
 
     echo ""
-    log_info "Device: $MANUFACTURER $MODEL"
+    local _friendly
+    _friendly=$(device_short_name "$MODEL")
+    log_info "Device: $_friendly ($MANUFACTURER $MODEL)"
     log_info "Android: $ANDROID_VERSION (SDK $SDK_VERSION)"
     log_info "Root: $ROOT_STATUS"
     log_info "Suggested profile: $SUGGESTED_PROFILE"

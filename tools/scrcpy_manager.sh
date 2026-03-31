@@ -18,12 +18,8 @@ case "$(basename "$0")" in
 esac
 
 cmd_list() {
-    echo "Connected devices:"
-    adb devices -l 2>/dev/null | grep -w device | while read -r serial _ rest; do
-        model=$(echo "$rest" | grep -oP 'model:\K[^ ]+' || echo "unknown")
-        short=$(echo "$model" | sed 's/SM_//' | tr '[:upper:]' '[:lower:]')
-        printf "  %-12s %-16s %s\n" "$short" "$serial" "$model"
-    done
+    echo "Connected devices:" >&2
+    list_devices table
 }
 
 cmd_all() {
@@ -46,9 +42,10 @@ cmd_all() {
 
     for serial in $serials; do
         model=$(adb -s "$serial" shell getprop ro.product.model 2>/dev/null | tr -d '\r' || echo "$serial")
-        echo "Launching: $model ($serial)"
+        short=$(device_short_name "$model")
+        echo "Launching: $short ($serial)"
         # Use setsid to fully detach process from terminal
-        setsid scrcpy -s "$serial" --window-title "$model" --max-size 800 >/dev/null 2>&1 &
+        setsid scrcpy -s "$serial" --window-title "$short" --max-size 800 >/dev/null 2>&1 &
         ((count++)) || true
         sleep 0.2
     done

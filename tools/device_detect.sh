@@ -103,8 +103,13 @@ detect_device() {
             ;;
     esac
 
+    # Resolve friendly device name
+    local friendly_name
+    friendly_name=$(device_short_name "$model")
+
     # Output in key=value format
     echo "DEVICE_SERIAL=$serial"
+    echo "DEVICE_NAME=$friendly_name"
     echo "MANUFACTURER=$manufacturer"
     echo "MODEL=$model"
     echo "DEVICE=$device"
@@ -135,6 +140,9 @@ print_device_info() {
         case "$key" in
             DEVICE_SERIAL)
                 log_info "Serial:          $value"
+                ;;
+            DEVICE_NAME)
+                log_info "Device:          $value"
                 ;;
             MANUFACTURER)
                 log_info "Manufacturer:    $value"

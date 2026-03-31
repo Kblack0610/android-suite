@@ -107,6 +107,64 @@ wait_for_device() {
     fi
 }
 
+# Get friendly short name for a device model string
+# Strips Samsung SM_ prefix, lowercases, maps known codenames
+device_short_name() {
+    local model="${1:-unknown}"
+    local short
+    short=$(echo "$model" | sed 's/SM[-_]//I' | tr '[:upper:]' '[:lower:]' | tr -d '\r')
+    # Map known model numbers to friendly names
+    case "$short" in
+        *f946*|*f956*) short="zfold6" ;;
+        *f936*|*f926*) short="zfold5" ;;
+        *f731*|*f721*) short="zflip5" ;;
+        *f741*|*f711*) short="zflip6" ;;
+        *s938*|*s928*) short="s25ultra" ;;
+        *s936*|*s926*) short="s25+" ;;
+        *s931*|*s921*) short="s25" ;;
+        *s918*)        short="s23ultra" ;;
+        *s916*)        short="s23+" ;;
+        *s911*)        short="s23" ;;
+        *s908*)        short="s22ultra" ;;
+        *s906*|*s901*) short="s22" ;;
+        *g998*)        short="s21ultra" ;;
+        *g996*)        short="s21+" ;;
+        *g991*)        short="s21" ;;
+        *a556*|*a546*) short="a55" ;;
+        *a356*|*a346*) short="a35" ;;
+        *a256*|*a246*) short="a25" ;;
+        *a156*|*a146*) short="a15" ;;
+    esac
+    echo "$short"
+}
+
+# List connected devices with friendly names
+# Output format: short_name  serial  full_model
+list_devices() {
+    local format="${1:-table}"  # table or plain
+    local devices_found=0
+
+    while read -r serial _ rest; do
+        [[ -z "$serial" ]] && continue
+        local model
+        model=$(echo "$rest" | grep -oP 'model:\K[^ ]+' || echo "unknown")
+        local short
+        short=$(device_short_name "$model")
+        if [[ "$format" == "table" ]]; then
+            printf "  ${CYAN}%-14s${NC} %-20s %s\n" "$short" "$serial" "$model" >&2
+        else
+            printf "  %s  %s  (%s)\n" "$serial" "$short" "$model" >&2
+        fi
+        ((devices_found++)) || true
+    done < <(adb devices -l 2>/dev/null | grep -w device)
+
+    if [[ "$devices_found" -eq 0 ]]; then
+        log_error "No devices connected"
+        return 1
+    fi
+    return 0
+}
+
 # Get single device serial (or prompt if multiple)
 get_device_serial() {
     # If DEVICE_SERIAL already set (via --serial flag), verify and use it
@@ -137,13 +195,9 @@ get_device_serial() {
     else
         # Multiple devices - require explicit --serial flag
         log_error "Multiple devices connected. Specify one with --serial:" >&2
-        log_info "" >&2
-        local serial model
-        for serial in $devices; do
-            model=$(adb -s "$serial" shell getprop ro.product.model 2>/dev/null | tr -d '\r')
-            log_info "  $serial  ($model)" >&2
-        done
-        log_info "" >&2
+        echo "" >&2
+        list_devices table
+        echo "" >&2
         log_info "Example: provision.sh --serial $(echo "$devices" | head -1) apps --set minimal" >&2
         return 1
     fi

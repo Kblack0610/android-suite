@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-SUITE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SUITE_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 source "$SUITE_DIR/base_functions.sh"
 
 VERSION="2.0.0"

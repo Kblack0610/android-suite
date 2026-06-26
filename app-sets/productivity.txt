@@ -9,9 +9,6 @@
 fdroid:com.ichi2.anki
 
 # === NOTES (Play Store) ===
-# Obsidian
-# playstore:md.obsidian
-
 # Samsung Notes
 # playstore:com.samsung.android.app.notes
 
@@ -48,4 +45,3 @@ fdroid:com.ichi2.anki
 
 # ---
 # AnkiDroid syncs with AnkiWeb for cross-device flashcards.
-# Obsidian vaults can sync via Syncthing or Git.

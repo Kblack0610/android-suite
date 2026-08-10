@@ -101,6 +101,14 @@ detect_device() {
         google)
             suggested_profile="pixel"
             ;;
+        lenovo|motorola)
+            # Both wall-panel tablets are Lenovo — pick m11/m9 by model code, else default
+            suggested_profile="$(device_short_name "$model")"
+            case "$suggested_profile" in
+                m11|m9) ;;
+                *) suggested_profile="default" ;;
+            esac
+            ;;
     esac
 
     # Resolve friendly device name

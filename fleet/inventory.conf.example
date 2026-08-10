@@ -1,0 +1,37 @@
+# Android Fleet Inventory  (Phase 1 — host-side scheduled runner)
+# ---------------------------------------------------------------------------
+# The human-editable source of truth for "what each device should be".
+# Copy this file to  fleet/inventory.conf  and edit for your fleet.
+# (inventory.conf is git-ignored so your real IPs stay out of the repo.)
+#
+# One device per line. Columns are whitespace-separated:
+#
+#   name       target             profile  app_set  debloat  degoogle  enabled  [mdns]
+#
+#   name      Friendly label used in logs/notifications.
+#   target    host[:port] the runner reaches over wireless ADB. Port defaults
+#             to 5555. Give the device a static IP / DHCP reservation.
+#   profile   Device config profile applied every run (drift correction).
+#             One of: profiles/<profile>.conf  (m11, m9, samsung, default, ...).
+#   app_set   App set whose apps are installed/upgraded every run, or "none".
+#             Prefer app-sets that use fdroid: sources — those auto-resolve the
+#             latest version each run. (See docs/fleet-runner.md.)
+#   debloat   Debloat tier re-applied every run (light|standard|aggressive) or
+#             "none". Day-2 default is "none" — debloat is an onboarding step.
+#   degoogle  1 to also remove Google apps during debloat, else 0. Ignored
+#             when debloat=none.
+#   enabled   1 to include this device in fleet runs, 0 to skip it.
+#   mdns      OPTIONAL. The device's mDNS service name (from `adb mdns services`,
+#             e.g. adb-XXXXXXXX-YYYYYY._adb-tls-connect._tcp). Used as a fallback
+#             when the static target is unreachable (e.g. after a reboot changed
+#             the Wireless-debugging port). Leave off if you don't use it.
+#
+# Blank lines and #-comments are ignored. Columns must not contain spaces.
+# ---------------------------------------------------------------------------
+
+# name        target              profile  app_set  debloat  degoogle  enabled
+m11-wall      192.168.1.60:5555   m11      none     none     0         1
+m9-wall       192.168.1.61:5555   m9       none     none     0         1
+
+# Example with an app set that auto-updates (fdroid: sources) and mDNS fallback:
+# office-tab   192.168.1.62:5555   default  minimal  none     0         1        adb-0A1B2C3D-4E5F6G._adb-tls-connect._tcp

@@ -1,0 +1,14 @@
+[Unit]
+Description=Scheduled Android fleet update
+Documentation=file:%h/.dotfiles/.local/src/android-suite/docs/fleet-runner.md
+
+[Timer]
+# Daily at 04:00. Kiosks live on chargers, so they're reachable overnight.
+OnCalendar=*-*-* 04:00:00
+# Run on next boot if the host was off at the scheduled time.
+Persistent=true
+# Spread load / avoid all-at-once if you run this on multiple hosts.
+RandomizedDelaySec=15min
+
+[Install]
+WantedBy=timers.target

@@ -114,7 +114,13 @@ Apply device-specific settings and optimizations.
 | `samsung` | Samsung Galaxy (OneUI) |
 | `xiaomi` | Xiaomi, Redmi, POCO (MIUI/HyperOS) |
 | `oneplus` | OnePlus, OPPO, Realme (OxygenOS/ColorOS) |
+| `m11` | Lenovo Tab M11 — HA FreeKiosk wall panel (always-on) |
+| `m9` | Lenovo Tab M9 — HA FreeKiosk wall panel (always-on) |
 | `default` | Universal settings |
+
+The `m11` / `m9` kiosk configs turn a wall-mounted tablet into an always-on Home
+Assistant panel (stay-awake, no lock screen, mic granted to FreeKiosk). See
+[docs/kiosk-m11-m9.md](docs/kiosk-m11-m9.md).
 
 ### Detect - Show Device Info
 
@@ -138,6 +144,29 @@ Run the complete provisioning workflow with interactive prompts.
 # Skip root extras
 ./provision.sh provision --skip-root
 ```
+
+### Connect - Provision Over the Network (OTA)
+
+Connect to a device over Wi-Fi so the rest of the commands run cable-free (pass the
+resulting `<ip>:<port>` as the `-S` serial). Ideal for wall-mounted kiosk tablets.
+
+```bash
+# Fully cable-free: Android 11+ Wireless-debugging pairing
+#   (tablet: Settings > Developer options > Wireless debugging > Pair with code)
+./provision.sh connect --pair 192.168.1.60:37115 --code 481502 --ip 192.168.1.60:43001
+
+# One-cable bootstrap: flip a USB device to TCP/IP, then unplug
+./provision.sh connect --from-usb
+
+# Already in TCP/IP mode
+./provision.sh connect --ip 192.168.1.60:5555
+
+# Then provision over the network
+./provision.sh config --device m11 -S 192.168.1.60:43001
+```
+
+See [docs/kiosk-m11-m9.md](docs/kiosk-m11-m9.md#over-the-network-ota-provisioning--no-cable)
+for the full OTA flow and the reboot caveat (non-rooted tablets re-connect after reboot).
 
 ## Global Options
 

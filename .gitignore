@@ -20,6 +20,9 @@ profiles/nas.conf
 # Custom app sets (user-specific)
 app-sets/custom.txt
 
+# Fleet inventory (user-specific device IPs)
+fleet/inventory.conf
+
 # Logs
 *.log
 provision.log

@@ -1,0 +1,14 @@
+[Unit]
+Description=Android fleet update run (config drift-correction + app updates)
+Documentation=file:%h/.dotfiles/.local/src/android-suite/docs/fleet-runner.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Adjust this path if your checkout lives elsewhere.
+ExecStart=%h/.dotfiles/.local/src/android-suite/provision.sh fleet
+# adb must be on PATH; add wherever your platform-tools live.
+Environment=PATH=/usr/bin:/usr/local/bin:%h/.local/bin
+# Be a good citizen on the host.
+Nice=10

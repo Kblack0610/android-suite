@@ -28,6 +28,9 @@ COMMANDS:
     detect      Detect device and show info
     provision   Run full provisioning (interactive)
     setup-agent Configure device for headless/automated access
+    connect     Connect to a device over the network (OTA, cable-free)
+    fleet       Update a whole fleet unattended (scheduled, config + apps)
+    enroll      Enroll a device into Headwind MDM (Device Owner, Phase 2)
 
 GLOBAL OPTIONS:
     -d, --dry-run           Preview without making changes
@@ -48,11 +51,28 @@ DEBLOAT OPTIONS:
     --list                  List available tiers
 
 CONFIG OPTIONS:
-    --device, -D <type>     Device profile (pixel, samsung, xiaomi, oneplus)
+    --device, -D <type>     Device profile (pixel, samsung, xiaomi, oneplus, m11, m9)
 
 SETUP-AGENT OPTIONS:
     --wireless, -w          Also enable wireless ADB (TCP/IP mode)
     --persistent            Make wireless ADB persist across reboots (requires root)
+
+CONNECT OPTIONS (over-the-network / cable-free):
+    --ip <host[:port]>      Connect target (port defaults to 5555)
+    --pair <host:port>      Android 11+ Wireless-debugging pairing endpoint
+    --code <nnnnnn>         6-digit pairing code (with --pair)
+    --from-usb              Flip a USB-attached device to TCP/IP, then connect
+    --port <n>              TCP/IP port for --from-usb (default 5555)
+
+FLEET OPTIONS (unattended, scheduled fleet updates):
+    --inventory <file>      Device inventory (default: fleet/inventory.conf)
+    -d, --dry-run           Preview every device's steps without writing
+
+ENROLL OPTIONS (Phase 2 -- Headwind MDM Device Owner onboarding):
+    --apk <file>            Path to hmdm.apk (default: apks/hmdm.apk)
+    --server <url>          MDM server URL (default: https://mdm.kblab.me)
+                            Also reads HMDM_SERVER_URL env var.
+    -d, --dry-run           Preview steps without making changes
 
 EXAMPLES:
     # Install personal app set
@@ -76,6 +96,21 @@ EXAMPLES:
     # Configure device for agent/automated access
     provision.sh setup-agent --wireless
 
+    # Update the whole fleet unattended (preview first, then for real)
+    provision.sh fleet --dry-run
+    provision.sh fleet
+
+    # Connect to a wall tablet over Wi-Fi (cable-free), then provision it
+    provision.sh connect --pair 192.168.1.60:3715 --code 481502 --ip 192.168.1.60:43001
+
+    # Enroll a USB-attached device into Headwind MDM (Device Owner):
+    #   1. Factory-reset (or remove all accounts) on the device first.
+    #   2. Download hmdm.apk from the MDM console -> copy to apks/hmdm.apk.
+    #   3. Plug in USB and run:
+    provision.sh enroll --dry-run      # preview the steps
+    provision.sh enroll                # run for real
+    provision.sh config --device m11 -S 192.168.1.60:43001
+
 APP SETS:
     minimal     Essential utilities only
     personal    Full personal phone setup
@@ -92,6 +127,8 @@ DEVICE CONFIGS:
     samsung     Samsung Galaxy (OneUI)
     xiaomi      Xiaomi/Redmi/POCO (MIUI/HyperOS)
     oneplus     OnePlus (OxygenOS/ColorOS)
+    m11         Lenovo Tab M11 — HA FreeKiosk wall panel (always-on)
+    m9          Lenovo Tab M9  — HA FreeKiosk wall panel (always-on)
     default     Universal settings
 
 For more info: https://github.com/kblack0610/android-suite
@@ -125,6 +162,20 @@ DEVICE_SERIAL=""
 # Setup-agent options
 WIRELESS=0
 PERSISTENT_WIRELESS=0
+
+# Connect (OTA) options
+CONNECT_IP=""
+CONNECT_PAIR=""
+CONNECT_CODE=""
+CONNECT_FROM_USB=0
+CONNECT_PORT=5555
+
+# Fleet options
+FLEET_INVENTORY=""
+
+# Enroll options (Phase 2 -- Headwind MDM)
+ENROLL_APK=""
+HMDM_SERVER_URL="${HMDM_SERVER_URL:-https://mdm.kblab.me}"
 
 # Legacy compatibility
 PROFILE=""
@@ -315,6 +366,46 @@ parse_args() {
             COMMAND="detect"
             shift
             ;;
+        connect)
+            COMMAND="connect"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    --ip)
+                        CONNECT_IP="$2"
+                        shift 2
+                        ;;
+                    --pair)
+                        CONNECT_PAIR="$2"
+                        shift 2
+                        ;;
+                    --code)
+                        CONNECT_CODE="$2"
+                        shift 2
+                        ;;
+                    --from-usb)
+                        CONNECT_FROM_USB=1
+                        shift
+                        ;;
+                    --port)
+                        CONNECT_PORT="$2"
+                        shift 2
+                        ;;
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
+                        shift 2
+                        ;;
+                    *)
+                        log_error "Unknown connect option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
+            ;;
         setup-agent)
             COMMAND="setup-agent"
             shift
@@ -343,6 +434,54 @@ parse_args() {
                         ;;
                     *)
                         log_error "Unknown setup-agent option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
+            ;;
+        fleet)
+            COMMAND="fleet"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    --inventory)
+                        FLEET_INVENTORY="$2"
+                        shift 2
+                        ;;
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    *)
+                        log_error "Unknown fleet option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
+            ;;
+        enroll)
+            COMMAND="enroll"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    --apk)
+                        ENROLL_APK="$2"
+                        shift 2
+                        ;;
+                    --server)
+                        HMDM_SERVER_URL="$2"
+                        shift 2
+                        ;;
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
+                        shift 2
+                        ;;
+                    *)
+                        log_error "Unknown enroll option: $1"
                         exit 1
                         ;;
                 esac
@@ -767,27 +906,34 @@ cmd_setup_agent() {
     local errors=0
 
     # 1. Disable lock screen
-    log_info "Step 1/4: Disabling lock screen..."
+    log_info "Step 1/5: Disabling lock screen..."
     disable_lock_screen || ((errors++))
 
     # 2. Configure stay awake
-    log_info "Step 2/4: Configuring stay awake..."
+    log_info "Step 2/5: Configuring stay awake..."
     configure_stay_awake || ((errors++))
 
     # 3. Grant shell root (if available)
-    log_info "Step 3/4: Configuring root access..."
+    log_info "Step 3/5: Configuring root access..."
     grant_shell_root || true  # Don't fail if not rooted
 
-    # 4. Enable wireless ADB if requested
+    # 4. Pre-authorize this host's ADB key so headless/scheduled runs never need
+    #    an on-device "Allow" tap. Requires root; on unrooted devices this is a
+    #    no-op — instead connect once over USB and tap "Always allow from this
+    #    computer" for THIS host's key (persists across reboots). See docs/fleet-runner.md
+    log_info "Step 4/5: Pre-authorizing ADB key (headless auth)..."
+    authorize_adb_key || true  # Non-fatal: unrooted uses the USB always-allow path
+
+    # 5. Enable wireless ADB if requested
     if [[ $WIRELESS -eq 1 ]]; then
-        log_info "Step 4/4: Enabling wireless ADB..."
+        log_info "Step 5/5: Enabling wireless ADB..."
         if [[ $PERSISTENT_WIRELESS -eq 1 ]]; then
             enable_persistent_wireless_adb || ((errors++))
         else
             enable_wireless_adb || ((errors++))
         fi
     else
-        log_info "Step 4/4: Wireless ADB skipped (use --wireless to enable)"
+        log_info "Step 5/5: Wireless ADB skipped (use --wireless to enable)"
     fi
 
     # Summary
@@ -803,6 +949,70 @@ cmd_setup_agent() {
     log_info "  adb shell whoami"
     log_info "  adb shell input tap 500 500"
     log_info "  adb shell dumpsys window | grep mCurrentFocus"
+}
+
+cmd_connect() {
+    log_section "Connect Over Network (OTA)"
+
+    if ! check_adb; then
+        return 1
+    fi
+
+    if [[ $DRY_RUN -eq 1 ]]; then
+        log_warning "DRY-RUN MODE - No changes will be made"
+    fi
+
+    local target=""
+
+    # Path 1: one-cable bootstrap (flip a USB device to TCP/IP, then connect)
+    if [[ $CONNECT_FROM_USB -eq 1 ]]; then
+        if ! check_device; then
+            log_error "--from-usb needs a USB-connected, authorized device"
+            return 1
+        fi
+        target=$(enable_wireless_adb "$CONNECT_PORT") || return 1
+
+    # Path 2: Android 11+ Wireless-debugging pairing (fully cable-free)
+    elif [[ -n "$CONNECT_PAIR" ]]; then
+        if [[ -z "$CONNECT_CODE" ]]; then
+            log_error "--pair requires --code <6-digit pairing code>"
+            return 1
+        fi
+        adb_pair "$CONNECT_PAIR" "$CONNECT_CODE" || return 1
+
+        # After pairing, connect. The connect port differs from the pairing port,
+        # so --ip is needed (fall back to the pair host on the default port).
+        if [[ -n "$CONNECT_IP" ]]; then
+            target=$(adb_connect "$CONNECT_IP") || return 1
+        else
+            log_warning "No --ip given; trying the pair host on port $CONNECT_PORT"
+            target=$(adb_connect "${CONNECT_PAIR%%:*}:$CONNECT_PORT") || {
+                log_error "Provide --ip <host:port> from the Wireless-debugging screen"
+                return 1
+            }
+        fi
+
+    # Path 3: plain connect (tcpip/wireless-debugging already on)
+    elif [[ -n "$CONNECT_IP" ]]; then
+        target=$(adb_connect "$CONNECT_IP") || return 1
+
+    else
+        log_error "Specify one of: --ip <host[:port]>, --pair <host:port> --code <n>, or --from-usb"
+        return 1
+    fi
+
+    # Handshake over the network so the user sees the device + suggested profile
+    if [[ $DRY_RUN -eq 0 ]]; then
+        export DEVICE_SERIAL="$target"
+        echo ""
+        run_phase 1 || return 1
+    fi
+
+    echo ""
+    log_success "Device reachable over the network: $target"
+    log_info "Now provision it with that serial, e.g.:"
+    log_info "  ./provision.sh debloat --level aggressive -S $target"
+    log_info "  ./provision.sh config  --device m11        -S $target"
 }
 
 # =============================================================================
@@ -833,6 +1043,18 @@ main() {
             ;;
         setup-agent)
             cmd_setup_agent
+            ;;
+        connect)
+            cmd_connect
+            ;;
+        fleet)
+            source "$SUITE_DIR/tools/fleet_runner.sh"
+            cmd_fleet
+            ;;
+        enroll)
+            export ENROLL_APK HMDM_SERVER_URL
+            source "$SUITE_DIR/tools/enroll.sh"
+            cmd_enroll
             ;;
         phase)
             if [[ -z "$PHASE" ]]; then

@@ -79,6 +79,9 @@ get_vendor_name() {
         google)
             echo "pixel"
             ;;
+        lenovo|motorola)
+            echo "lenovo"
+            ;;
         *)
             echo ""
             ;;

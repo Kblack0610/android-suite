@@ -1,0 +1,41 @@
+# Lenovo / Motorola Tablet Debloat List
+# Targets stock-Android Lenovo Tab M-series (M8/M9/M11). Safe: every removal is
+# user-level (pm uninstall -k --user 0) and skipped if the package isn't present.
+#
+# Discover what's actually on YOUR tablet before relying on this list:
+#   adb shell pm list packages | grep -iE 'lenovo|tblenovo|zui|motorola'
+# Pair with: ./provision.sh debloat --level aggressive   (adds the cross-vendor bloat)
+# and, if you truly want it degoogled: --degoogle (removes the Play suite too).
+
+# === Lenovo service framework / account / ID ===
+com.lenovo.lsf.user
+com.lenovo.lsf.device
+com.lenovo.payplus            # Lenovo Pay / account
+com.lenovo.lps.cloud.sync.row
+
+# === Lenovo tablet apps (near-stock M-series) ===
+com.tblenovo.center           # Lenovo "Tab Manager" / device assistant
+com.tblenovo.soundrecorder    # Lenovo Recorder
+com.tblenovo.appwidget        # Lenovo widgets
+
+# === Lenovo / partner content & suggestions ===
+com.zui.gallery               # ZUI Gallery (some SKUs; use Google Photos or Immich instead)
+com.lenovo.browser            # Lenovo Browser (kiosk uses FreeKiosk's webview)
+com.lenovo.weathercenter
+com.lenovo.magazine           # Lock-screen "magazine"/wallpaper suggestions
+
+# === Common preinstalled third-party bloat (uncomment any that exist on yours) ===
+# com.netflix.mediaclient
+# com.netflix.partner.activation
+# com.facebook.system
+# com.facebook.appmanager
+# com.facebook.services
+# com.booking
+# com.microsoft.skydrive
+# com.amazon.mShop.android.shopping
+
+# === DO NOT REMOVE (kept intentionally) ===
+# com.tblenovo.launcher       # Stock launcher — removing before FreeKiosk is set as
+#                             # Home can leave the tablet with no launcher. Set FreeKiosk
+#                             # as Home first, then remove this by hand if you want.
+# com.google.android.webview  # WebView engine the FreeKiosk dashboard renders in — REQUIRED.

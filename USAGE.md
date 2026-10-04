@@ -168,6 +168,21 @@ resulting `<ip>:<port>` as the `-S` serial). Ideal for wall-mounted kiosk tablet
 See [docs/kiosk-m11-m9.md](docs/kiosk-m11-m9.md#over-the-network-ota-provisioning--no-cable)
 for the full OTA flow and the reboot caveat (non-rooted tablets re-connect after reboot).
 
+### Backup and Clean - Copy the Phone to a Disk, Then Free It
+
+`backup` mirrors internal storage into `<dir>/<device>/` (e.g. `.../android/zfold5/DCIM/...`), keeping file times. It skips files already on the disk at the same size, so an interrupted run resumes by running it again, and it re-reads the disk afterwards to prove every file landed. `Android/data`, `Android/obb` and `.thumbnails` are skipped: they are app-private or caches.
+
+`clean` deletes from the phone only files whose backup copy matches by size and md5. Everything else stays and is listed. It defaults to the media folders (DCIM, Pictures, Movies, Download, Documents, Recordings, Music); pass `--path` for others, e.g. WhatsApp media.
+
+```bash
+./provision.sh backup --to /run/media/$USER/Backup/android
+./provision.sh clean  --to /run/media/$USER/Backup/android --dry-run
+./provision.sh clean  --to /run/media/$USER/Backup/android
+./provision.sh clean  --to /run/media/$USER/Backup/android --path Android/media/com.whatsapp/WhatsApp/Media
+```
+
+Uses adb rather than MTP (plug in and drag) because MTP stalls on large folders, cannot resume and cannot verify a copy before you delete. SMS, call log, contacts and app data are not in shared storage, so they need the phone's own backup or an app such as SMS Backup & Restore.
+
 ## Global Options
 
 | Option | Description |

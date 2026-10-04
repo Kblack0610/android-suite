@@ -31,6 +31,8 @@ COMMANDS:
     connect     Connect to a device over the network (OTA, cable-free)
     fleet       Update a whole fleet unattended (scheduled, config + apps)
     enroll      Enroll a device into Headwind MDM (Device Owner, Phase 2)
+    backup      Copy the phone's files to a disk (incremental, resumable)
+    clean       Delete files from the phone that are verified in the backup
 
 GLOBAL OPTIONS:
     -d, --dry-run           Preview without making changes
@@ -74,6 +76,14 @@ ENROLL OPTIONS (Phase 2 -- Headwind MDM Device Owner onboarding):
                             Also reads HMDM_SERVER_URL env var.
     -d, --dry-run           Preview steps without making changes
 
+BACKUP / CLEAN OPTIONS:
+    --to <dir>              Backup disk folder; files land in <dir>/<device>/
+    --path <rel>            Folder under internal storage, repeatable
+                            (backup default: everything; clean default:
+                            DCIM Pictures Movies Download Documents Recordings Music)
+    -d, --dry-run           Show what would be copied / deleted
+    -f, --force             clean: skip the delete confirmation
+
 EXAMPLES:
     # Install personal app set
     provision.sh apps --set personal
@@ -110,6 +120,11 @@ EXAMPLES:
     provision.sh enroll --dry-run      # preview the steps
     provision.sh enroll                # run for real
     provision.sh config --device m11 -S 192.168.1.60:43001
+
+    # Back up the phone to a big disk, then free it (only verified copies are deleted)
+    provision.sh backup --to /run/media/$USER/Backup/android
+    provision.sh clean  --to /run/media/$USER/Backup/android --dry-run
+    provision.sh clean  --to /run/media/$USER/Backup/android
 
 APP SETS:
     minimal     Essential utilities only
@@ -176,6 +191,10 @@ FLEET_INVENTORY=""
 # Enroll options (Phase 2 -- Headwind MDM)
 ENROLL_APK=""
 HMDM_SERVER_URL="${HMDM_SERVER_URL:-https://mdm.kblab.me}"
+
+# Backup / clean options
+BACKUP_DEST=""
+BACKUP_PATHS=()
 
 # Legacy compatibility
 PROFILE=""
@@ -482,6 +501,38 @@ parse_args() {
                         ;;
                     *)
                         log_error "Unknown enroll option: $1"
+                        exit 1
+                        ;;
+                esac
+            done
+            ;;
+        backup|clean)
+            COMMAND="$1"
+            shift
+            while [[ $# -gt 0 ]]; do
+                case "$1" in
+                    --to)
+                        BACKUP_DEST="$2"
+                        shift 2
+                        ;;
+                    --path)
+                        BACKUP_PATHS+=("$2")
+                        shift 2
+                        ;;
+                    -d|--dry-run)
+                        DRY_RUN=1
+                        shift
+                        ;;
+                    -f|--force)
+                        FORCE=1
+                        shift
+                        ;;
+                    -S|--serial)
+                        DEVICE_SERIAL="$2"
+                        shift 2
+                        ;;
+                    *)
+                        log_error "Unknown $COMMAND option: $1"
                         exit 1
                         ;;
                 esac
@@ -1055,6 +1106,14 @@ main() {
             export ENROLL_APK HMDM_SERVER_URL
             source "$SUITE_DIR/tools/enroll.sh"
             cmd_enroll
+            ;;
+        backup)
+            source "$SUITE_DIR/tools/backup.sh"
+            cmd_backup
+            ;;
+        clean)
+            source "$SUITE_DIR/tools/backup.sh"
+            cmd_clean
             ;;
         phase)
             if [[ -z "$PHASE" ]]; then

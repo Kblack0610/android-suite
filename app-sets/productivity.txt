@@ -8,6 +8,10 @@
 # AnkiDroid - Flashcards
 fdroid:com.ichi2.anki
 
+# Obtainium - installs and updates apps from Forgejo/GitHub releases; follows
+# the Markor fork (net.gsantner.markor.kb) at git.kennethblack.me/kblack0610/markor
+fdroid:dev.imranr.obtainium.fdroid
+
 # === NOTES (Play Store) ===
 # Samsung Notes
 # playstore:com.samsung.android.app.notes

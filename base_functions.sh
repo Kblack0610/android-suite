@@ -242,18 +242,27 @@ setting_get() {
 # Package Management
 # =============================================================================
 
-# Uninstall a package (user-level, preserves data). Succeeds only when pm prints Success: pm can
-# refuse (Failure [DELETE_FAILED_OWNER_BLOCKED] on a Samsung spayfw) and adb shell still exits 0.
+# pm_succeeded <pm output> -> 0 when pm's last line is Success. pm can refuse (Failure
+# [DELETE_FAILED_OWNER_BLOCKED] on a Samsung spayfw) while adb shell still exits 0, so the
+# exit status alone says nothing; otherwise the reason is logged as a warning.
+pm_succeeded() {
+    local out="${1//$'\r'/}" last
+    last=$(printf '%s\n' "$out" | awk 'NF {l = $0} END {print l}')
+    [[ "$last" == "Success" ]] && return 0
+    log_warning "pm: ${last:-no output}"
+    return 1
+}
+
+# Uninstall a package (user-level, preserves data unless the second argument is false).
 uninstall_package() {
     local package="$1"
     local keep_data="${2:-true}"
-    local keep=() out
+    local args=(uninstall) out
 
-    [[ "$keep_data" == "true" ]] && keep=(-k)
-    out=$(adb_cmd shell pm uninstall "${keep[@]}" --user 0 "$package" 2>&1) || true
-    [[ "$out" == *Success* ]] && return 0
-    log_debug "pm uninstall $package: ${out:-no output}"
-    return 1
+    [[ "$keep_data" == "true" ]] && args+=(-k)
+    args+=(--user 0 "$package")
+    out=$(adb_cmd shell pm "${args[@]}" 2>&1) || true
+    pm_succeeded "$out"
 }
 
 # Check if package is installed
@@ -553,7 +562,7 @@ enable_persistent_wireless_adb() {
 export -f log_info log_error log_warning log_section log_success log_debug
 export -f check_adb check_device wait_for_device get_device_serial adb_cmd
 export -f setting_put setting_get
-export -f uninstall_package is_package_installed install_apk
+export -f pm_succeeded uninstall_package is_package_installed install_apk
 export -f load_profile is_dry_run confirm
 export -f get_device_ip enable_wireless_adb enable_persistent_wireless_adb
 export -f adb_connect adb_pair

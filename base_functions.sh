@@ -242,16 +242,18 @@ setting_get() {
 # Package Management
 # =============================================================================
 
-# Uninstall a package (user-level, preserves data)
+# Uninstall a package (user-level, preserves data). Succeeds only when pm prints Success: pm can
+# refuse (Failure [DELETE_FAILED_OWNER_BLOCKED] on a Samsung spayfw) and adb shell still exits 0.
 uninstall_package() {
     local package="$1"
     local keep_data="${2:-true}"
+    local keep=() out
 
-    if [[ "$keep_data" == "true" ]]; then
-        adb_cmd shell pm uninstall -k --user 0 "$package" 2>/dev/null || true
-    else
-        adb_cmd shell pm uninstall --user 0 "$package" 2>/dev/null || true
-    fi
+    [[ "$keep_data" == "true" ]] && keep=(-k)
+    out=$(adb_cmd shell pm uninstall "${keep[@]}" --user 0 "$package" 2>&1) || true
+    [[ "$out" == *Success* ]] && return 0
+    log_debug "pm uninstall $package: ${out:-no output}"
+    return 1
 }
 
 # Check if package is installed

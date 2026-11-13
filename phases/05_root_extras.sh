@@ -90,7 +90,9 @@ remove_system_app() {
     log_info "Removing system app: $package"
 
     # Use pm uninstall with root
-    if adb_cmd shell su -c "pm uninstall $package" 2>/dev/null; then
+    local out
+    out=$(adb_cmd shell su -c "pm uninstall $package" 2>&1) || true
+    if pm_succeeded "$out"; then
         log_success "Removed: $package"
         return 0
     fi

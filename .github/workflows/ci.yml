@@ -1,0 +1,21 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: bash -n
+        run: git ls-files -z '*.sh' | xargs -0 -n1 bash -n
+      # Error severity: the tree is clean there; six older warnings would red every PR at warning.
+      - name: shellcheck
+        run: git ls-files -z '*.sh' | xargs -0 shellcheck -S error

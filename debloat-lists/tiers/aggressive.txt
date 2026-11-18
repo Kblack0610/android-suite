@@ -16,8 +16,9 @@ com.google.android.apps.docs.editors.sheets
 # Standalone Google Assistant app
 com.google.android.apps.googleassistant
 
-# Chrome (if using Firefox/other browser)
-com.android.chrome
+# Chrome (if using Firefox/other browser). Kept: vendor/samsung.txt also removes Samsung Internet
+# and nothing here installs a replacement, so a Samsung phone was left with no browser at all.
+# com.android.chrome  # Uncomment once another browser is installed
 
 # Google Maps (if using OsmAnd/other)
 # com.google.android.apps.maps  # Uncomment if you have alternative

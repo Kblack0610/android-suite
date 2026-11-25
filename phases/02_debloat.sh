@@ -254,13 +254,16 @@ phase_debloat() {
         fi
     fi
 
-    # Step 6: Debloat. A package pm refused fails the phase, after the rest were tried.
-    local rc=0
-    debloat_packages "${all_packages[@]}" || rc=1
+    # Step 6: Debloat. A package pm refused returns 2, after the rest were tried, so a caller
+    # can go on past it and still stop on any other failure (1).
+    if ! debloat_packages "${all_packages[@]}"; then
+        log_section "Debloat Finished With Failures"
+        log_warning "Some packages failed to uninstall (see the Debloat Summary)"
+        return 2
+    fi
 
     log_section "Debloat Complete"
-    [[ $rc -eq 0 ]] || log_warning "Some packages failed to uninstall (see above)"
-    return $rc
+    return 0
 }
 
 # =============================================================================

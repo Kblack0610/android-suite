@@ -661,13 +661,6 @@ run_phase() {
     esac
 }
 
-# debloat_failed_exit <rc> -> rc, saying so when the debloat phase left packages installed.
-debloat_failed_exit() {
-    [[ "$1" -eq 0 ]] && return 0
-    log_warning "Debloat: some packages failed to uninstall (see the Debloat Summary)"
-    return 1
-}
-
 # =============================================================================
 # Command Handlers
 # =============================================================================
@@ -736,7 +729,7 @@ cmd_debloat() {
     run_phase 1 || return 1
 
     # Phase 2: Debloat with tier system
-    run_phase 2 || return 1
+    run_phase 2 || return $?
 
     log_success "Debloat complete"
 }
@@ -803,9 +796,10 @@ cmd_quick() {
     log_info "  Apps: minimal"
     log_info ""
 
-    # Phase 2: Debloat. A failed package does not stop the later phases; the run exits 1.
+    # Phase 2: Debloat. A failed package (2) does not stop the later phases; the run exits 2.
+    # Any other failure stops here.
     local debloat_rc=0
-    run_phase 2 || debloat_rc=1
+    run_phase 2 || { debloat_rc=$?; [[ $debloat_rc -eq 2 ]] || return "$debloat_rc"; }
 
     # Phase 3: Install Apps
     echo ""
@@ -822,7 +816,7 @@ cmd_quick() {
     log_info "Next steps:"
     log_info "  1. Reboot device"
     log_info "  2. Sign into accounts"
-    debloat_failed_exit "$debloat_rc"
+    return "$debloat_rc"
 }
 
 cmd_provision() {
@@ -897,10 +891,11 @@ cmd_provision() {
     # Load profile
     load_profile "$PROFILE"
 
-    # Phase 2: Debloat. A failed package does not stop the later phases; the run exits 1.
+    # Phase 2: Debloat. A failed package (2) does not stop the later phases; the run exits 2.
+    # Any other failure stops here.
     echo ""
     local debloat_rc=0
-    run_phase 2 || debloat_rc=1
+    run_phase 2 || { debloat_rc=$?; [[ $debloat_rc -eq 2 ]] || return "$debloat_rc"; }
 
     # Phase 3: Install Apps
     if [[ "$APP_SET" != "none" ]]; then
@@ -934,7 +929,7 @@ cmd_provision() {
     log_info "  1. Reboot device"
     log_info "  2. Sign into accounts"
     log_info "  3. Configure app settings"
-    debloat_failed_exit "$debloat_rc"
+    return "$debloat_rc"
 }
 
 cmd_setup_agent() {

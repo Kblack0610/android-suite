@@ -729,7 +729,7 @@ cmd_debloat() {
     run_phase 1 || return 1
 
     # Phase 2: Debloat with tier system
-    run_phase 2
+    run_phase 2 || return $?
 
     log_success "Debloat complete"
 }
@@ -796,8 +796,10 @@ cmd_quick() {
     log_info "  Apps: minimal"
     log_info ""
 
-    # Phase 2: Debloat
-    run_phase 2
+    # Phase 2: Debloat. A failed package (2) does not stop the later phases; the run exits 2.
+    # Any other failure stops here.
+    local debloat_rc=0
+    run_phase 2 || { debloat_rc=$?; [[ $debloat_rc -eq 2 ]] || return "$debloat_rc"; }
 
     # Phase 3: Install Apps
     echo ""
@@ -814,6 +816,7 @@ cmd_quick() {
     log_info "Next steps:"
     log_info "  1. Reboot device"
     log_info "  2. Sign into accounts"
+    return "$debloat_rc"
 }
 
 cmd_provision() {
@@ -888,9 +891,11 @@ cmd_provision() {
     # Load profile
     load_profile "$PROFILE"
 
-    # Phase 2: Debloat
+    # Phase 2: Debloat. A failed package (2) does not stop the later phases; the run exits 2.
+    # Any other failure stops here.
     echo ""
-    run_phase 2
+    local debloat_rc=0
+    run_phase 2 || { debloat_rc=$?; [[ $debloat_rc -eq 2 ]] || return "$debloat_rc"; }
 
     # Phase 3: Install Apps
     if [[ "$APP_SET" != "none" ]]; then
@@ -924,6 +929,7 @@ cmd_provision() {
     log_info "  1. Reboot device"
     log_info "  2. Sign into accounts"
     log_info "  3. Configure app settings"
+    return "$debloat_rc"
 }
 
 cmd_setup_agent() {

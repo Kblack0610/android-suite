@@ -56,6 +56,8 @@ Install apps from predefined app sets with support for local APKs, F-Droid, and 
 
 Remove unwanted system apps using a tiered approach.
 
+Exit status: 0 when every listed package that was installed came off, 2 when pm refused some of them (the rest still come off; `quick`, `provision` and `wall-panel-provision.sh` run their later steps, then exit 2), 1 for any other failure, such as no device or an unknown level.
+
 ```bash
 # List available tiers
 ./provision.sh debloat --list

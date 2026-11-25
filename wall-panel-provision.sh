@@ -69,7 +69,11 @@ if [ "$DRY" != 1 ]; then
 fi
 
 step "1/7 Debloat (aggressive)"
-( cd "$SUITE" && ./provision.sh debloat --level aggressive -S "$SERIAL" --force $([ "$DRY" = 1 ] && echo --dry-run) )
+# Exit 2 is a package pm refused: the panel still gets the rest, and this run exits 2 at the end.
+DEBLOAT_RC=0
+( cd "$SUITE" && ./provision.sh debloat --level aggressive -S "$SERIAL" --force $([ "$DRY" = 1 ] && echo --dry-run) ) || DEBLOAT_RC=$?
+[ "$DEBLOAT_RC" -eq 0 ] || [ "$DEBLOAT_RC" -eq 2 ] || exit "$DEBLOAT_RC"
+[ "$DEBLOAT_RC" -eq 0 ] || echo "    WARNING: some packages failed to debloat (see above); continuing"
 
 step "2/7 FreeKiosk install + config (URL/PIN/kiosk/auto-boot/REST)"
 "$FK_PROVISION" --serial "$SERIAL" --name "$NAME" --apk "$FK_APK" \
@@ -121,3 +125,7 @@ Finish ON THE TABLET (not ADB-scriptable):
 
 Headwind manages it OTA from here (fleet: android_<device> in gatus).
 EOF
+if [ "$DEBLOAT_RC" -ne 0 ]; then
+  echo "Debloat left packages installed (step 1): exit 2"
+  exit 2
+fi

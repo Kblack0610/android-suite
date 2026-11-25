@@ -88,7 +88,7 @@ get_vendor_name() {
     esac
 }
 
-# Debloat using package list
+# Debloat using package list; returns 1 when any package failed to uninstall.
 debloat_packages() {
     local packages=("$@")
     local total=${#packages[@]}
@@ -125,6 +125,7 @@ debloat_packages() {
     log_info "Removed: $removed"
     log_info "Skipped (not installed): $skipped"
     log_info "Failed: $failed"
+    [[ $failed -eq 0 ]]
 }
 
 # Check for UAD export file
@@ -253,11 +254,13 @@ phase_debloat() {
         fi
     fi
 
-    # Step 6: Debloat
-    debloat_packages "${all_packages[@]}"
+    # Step 6: Debloat. A package pm refused fails the phase, after the rest were tried.
+    local rc=0
+    debloat_packages "${all_packages[@]}" || rc=1
 
     log_section "Debloat Complete"
-    return 0
+    [[ $rc -eq 0 ]] || log_warning "Some packages failed to uninstall (see above)"
+    return $rc
 }
 
 # =============================================================================

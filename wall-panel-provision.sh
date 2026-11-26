@@ -21,7 +21,7 @@
 set -euo pipefail
 
 SUITE="$HOME/.dotfiles/.local/src/android-suite"
-FK_PROVISION="$HOME/dev/home/home-config/scripts/provision-wall-tablet.sh"
+FK_PROVISION="$HOME/dev/home/home-config/scripts/home-assistant/provision-wall-tablet.sh"
 FK_APK="$SUITE/apks/freekiosk.apk"
 
 SERIAL="" NAME="" DEVICE="m11" DRY=0
